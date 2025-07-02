@@ -1,4 +1,4 @@
-name: AutoIPTV
+name: AutoFetchAndMergeIPTV
 
 on:
 schedule:
@@ -25,7 +25,9 @@ steps:
 - name: Download, Clean and Merge M3U Files  
   run: |  
     LINKS=(  
-
+      "https://raw.githubusercontent.com/kiki4177/iptv/main/JSS"  
+      "https://raw.githubusercontent.com/kiki4177/iptv/main/JSTORE-PRIMETV"  
+      "https://raw.githubusercontent.com/kiki4177/iptv/main/Kiki"  
       "https://raw.githubusercontent.com/kfwong15/ABC/refs/heads/main/owntv"  
     )  
 
@@ -70,6 +72,3 @@ steps:
     git commit -m "Auto update at ${GET_TIME}" || echo "✅ 无需提交"  
     git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git  
     git push || echo "✅ 无需推送"
-
-
-
