@@ -164,7 +164,7 @@ Sila isi URL dalam ott ikut step. bukan click link ini
 
 
 
-#EXTM3U url-tvg="https://raw.githubusercontent.com/kfwong15/webtao/refs/heads/main/epg.xml"
+#EXTM3U url-tvg="https://github.com/kfwong15/AutoBot/releases/download/epg-release/epg.xml"
 
 # --------------------
 # 中国频道_移动源
