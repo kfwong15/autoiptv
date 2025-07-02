@@ -44,19 +44,28 @@ jobs:
             grep -q "^#EXTM3U" "$FILE_NAME" || sed -i '1i #EXTM3U' "$FILE_NAME"
             sed -i '/^\s*$/d' "$FILE_NAME"
 
-            awk -v RS='#EXTINF' 'NR>1{print "#EXTINF" $0}' "$FILE_NAME" | while read -r block; do
-              NAME=$(echo "$block" | grep -oP '(?<=,).*' | head -1)
-              URL_LINE=$(echo "$block" | tail -n1)
+            total_lines=$(wc -l < "$FILE_NAME")
+            i=1
+            while [ $i -le $total_lines ]; do
+              LINE1=$(sed -n "${i}p" "$FILE_NAME")
+              LINE2=$(sed -n "$((i+1))p" "$FILE_NAME")
 
-              if curl -s --head --fail --max-time 5 "$URL_LINE" > /dev/null; then
+              if [[ "$LINE1" == \#EXTINF* ]] && [[ "$LINE2" == http* ]]; then
+                NAME=$(echo "$LINE1" | sed -n 's/^.*,//p' | tr -d '\r\n')
+
                 if ! grep -q ",$NAME$" "$TEMP_ALL"; then
-                  echo "$block" >> "$TEMP_ALL"
+                  if curl -s --fail --max-time 5 "$LINE2" > /dev/null; then
+                    echo "$LINE1" >> "$TEMP_ALL"
+                    echo "$LINE2" >> "$TEMP_ALL"
+                  else
+                    echo "❌ 无效链接：$NAME ($LINE2)，已跳过"
+                  fi
                 else
                   echo "⚠️ 重复频道：$NAME，已跳过"
                 fi
-              else
-                echo "❌ 无效链接：$NAME ($URL_LINE)，已跳过"
               fi
+
+              i=$((i+1))
             done
           else
             echo "❌ 文件为空或下载失败：$FILE_NAME"
