@@ -163,13 +163,15 @@ Sila isi URL dalam ott ikut step. bukan click link ini
 
 #EXTM3U url-tvg="https://epg.51zmt.top:8001/e.xml"
 
-#EXTINF:-1 tvg-id="CCTV1" group-title="中国电视大全",CCTV1
-http://183.221.193.148:4022/rtp/239.11.0.65:5140
-#EXTINF:-1 tvg-id="CCTV2" group-title="中国电视大全",CCTV2
-http://183.221.193.148:4022/rtp/239.11.0.108:5140
-#EXTINF:-1 tvg-id="CCTV3" group-title="中国电视大全",CCTV3
-http://183.221.193.148:4022/rtp/239.11.0.101:5140
-
+#EXTM3U
+#EXTINF:-1 tvg-id="CCTV1" group-title="中国",CCTV1 综合
+https://hls-gateway.vpstv.net/streams/476879.m3u8
+#EXTINF:-1 tvg-id="CCTV2" group-title="中国",CCTV2 财经
+https://hls-gateway.vpstv.net/streams/476881.m3u8
+#EXTINF:-1 tvg-id="CCTV3" group-title="中国",CCTV3 综艺
+https://hls-gateway.vpstv.net/streams/476883.m3u8
+#EXTINF:-1 tvg-id="CCTV4" group-title="中国",CCTV4 中文国际
+https://hls-gateway.vpstv.net/streams/476885.m3u8
 
 #EXTM3U url-tvg="http://example.com/epg.xml"
 #EXTINF:-1 tvg-id="CCTV4" tvg-name="CCTV4" tvg-logo="" group-title="中国电视大全",CCTV4
