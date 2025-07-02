@@ -2,8 +2,8 @@ name: Update
 
 on:
   schedule:
-    - cron: '*/1 * * * *'   # 每分钟运行
-  workflow_dispatch:        # 手动触发按钮
+    - cron: '*/6 * * * *'  # 每6分钟运行一次
+  workflow_dispatch:        # 支持手动运行
 
 env:
   TZ: Asia/Shanghai
@@ -26,34 +26,46 @@ jobs:
       run: |
         wget https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/ipv6.m3u -O source.m3u || true
 
-        grep -A1 "央视" source.m3u > CCTV.m3u || true
+        echo "=== 源文件内容预览 ==="
+        head -n 20 source.m3u || true
+
+        # 央视源（匹配英文 CCTV）
+        grep -A1 "CCTV" source.m3u > CCTV.m3u || true
+        # 卫视源（多个关键字）
         grep -A1 "卫视" source.m3u > CNTV1.m3u || true
         grep -A1 "数字" source.m3u > CNTV2.m3u || true
         grep -A1 "百视" source.m3u > CNTV3.m3u || true
 
-        cat CNTV1.m3u CNTV2.m3u CNTV3.m3u > CNTV.m3u || true
+        cat CNTV1.m3u CNTV2.m3u CNTV3.m3u > CNTV.m3u
         echo "#EXTM3U" | cat - CCTV.m3u > temp && mv temp CCTV.m3u
         echo "#EXTM3U" | cat - CNTV.m3u > temp && mv temp CNTV.m3u
 
         cat CCTV.m3u CNTV.m3u > IPTV.m3u
         echo "#EXTM3U" | cat - IPTV.m3u > temp && mv temp IPTV.m3u
 
-        rm -f CNTV1.m3u CNTV2.m3u CNTV3.m3u source.m3u
+        # 下载 EPG
         wget https://epg.112114.xyz/pp.xml -O EPG.xml || true
+
         echo "Auto Update IPTV in ${GET_TIME}" > README.md
 
-    - name: Push to Files branch (clean + force)
+    - name: Debug File Output
+      run: |
+        echo "====== 当前文件列表 ======"
+        ls -al
+        echo "====== IPTV 内容预览 ======"
+        head -n 10 IPTV.m3u || echo "IPTV.m3u 未生成"
+        echo "====== EPG 预览 ======"
+        head -n 10 EPG.xml || echo "EPG.xml 未生成"
+
+    - name: Push to Files Branch
       run: |
         git config --global user.name "kfwong15"
         git config --global user.email "kfwong15@users.noreply.github.com"
 
-        # 在当前目录提交并推送到 Files 分支
+        # 使用孤立分支避免冲突
         git checkout --orphan Files || git checkout -B Files
         git reset --hard
         git clean -fdx
-
-        echo "== 显示文件列表 =="
-        ls -al
 
         touch CCTV.m3u CNTV.m3u IPTV.m3u EPG.xml README.md
 
