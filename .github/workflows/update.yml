@@ -3,7 +3,7 @@ name: AutoFetchAndMergeIPTV
 on:
   schedule:
     - cron: '*/6 * * * *'  # 每6分钟运行一次
-  workflow_dispatch:        # 支持手动运行
+  workflow_dispatch:
 
 env:
   TZ: Asia/Shanghai
@@ -52,7 +52,6 @@ jobs:
 
               if [[ "$LINE1" == \#EXTINF* ]] && [[ "$LINE2" == http* ]]; then
                 NAME=$(echo "$LINE1" | sed -n 's/^.*,//p' | tr -d '\r\n')
-
                 if ! grep -q ",$NAME$" "$TEMP_ALL"; then
                   echo "$LINE1" >> "$TEMP_ALL"
                   echo "$LINE2" >> "$TEMP_ALL"
@@ -62,7 +61,23 @@ jobs:
               fi
 
               i=$((i+1))
-            done
+            done  # ← ← ← 这里是关键，原来少了它
           else
             echo "❌ 文件为空或下载失败：$FILE_NAME"
           fi
+        done
+
+        cat "$TEMP_ALL" >> ALL_IPTV.m3u
+        rm -f "$TEMP_ALL"
+
+        echo "Auto update at ${GET_TIME}" > README.md
+
+    - name: Commit and push
+      run: |
+        git config --global user.name "kfwong15"
+        git config --global user.email "kfwong15@users.noreply.github.com"
+
+        git add *.m3u README.md || echo "⚠️ 没有变化"
+        git commit -m "Auto update at ${GET_TIME}" || echo "✅ 无需提交"
+        git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+        git push || echo "✅ 无需推送"
