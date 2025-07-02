@@ -3,7 +3,7 @@ name: Update
 on:
   push:
   schedule:
-    - cron: '*/1 * * * *'  # 每 1 分钟运行一次（注意免费账号 GitHub 会限制最小5分钟）
+    - cron: '*/1 * * * *'  # 每 1 分钟运行一次（注意：GitHub 免费账户最小实际执行间隔为 5 分钟）
 
 env:
   TZ: Asia/Shanghai
@@ -29,11 +29,14 @@ jobs:
 
     - name: Update IPTV Files
       run: |
-        # 下载源
+        set +e  # 忽略部分命令错误避免中断
+
+        # 下载源文件
         wget https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/ipv6.m3u -O source.m3u
 
         # 央视源
-        grep -A1 "央视" source.m3u > CCTV.m3u || echo "#EXTM3U" > CCTV.m3u
+        grep -A1 "央视" source.m3u > CCTV.m3u
+        [ -s CCTV.m3u ] || echo "#EXTM3U" > CCTV.m3u
         sed -i '1i #EXTM3U' CCTV.m3u
         sed -i '/^\s*$/d' CCTV.m3u
 
@@ -42,21 +45,24 @@ jobs:
         grep -A1 "数字" source.m3u > CNTV2.m3u
         grep -A1 "百视" source.m3u > CNTV3.m3u
         cat CNTV1.m3u CNTV2.m3u CNTV3.m3u > CNTV.m3u
+        [ -s CNTV.m3u ] || echo "#EXTM3U" > CNTV.m3u
         sed -i '1i #EXTM3U' CNTV.m3u
         sed -i '/^\s*$/d' CNTV.m3u
         rm -f CNTV1.m3u CNTV2.m3u CNTV3.m3u
 
-        # 整合源
+        # 整合 IPTV 源
         cat CCTV.m3u CNTV.m3u > IPTV.m3u
         sed -i '/#EXTM3U/d' IPTV.m3u
         sed -i '1i #EXTM3U' IPTV.m3u
         sed -i '/^\s*$/d' IPTV.m3u
 
-        # EPG
+        # 下载 EPG 节目单
         wget https://epg.112114.xyz/pp.xml -O EPG.xml
 
-        # 更新时间说明
+        # 更新说明
         echo "Auto Update IPTV in ${GET_TIME}" > README.md
+
+        set -e  # 恢复错误中断机制
 
     - name: Push to Files Branch
       run: |
