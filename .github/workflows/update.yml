@@ -3,7 +3,7 @@ name: Update
 on:
   push:
   schedule:
-    - cron: '0,30 * * * *'  # 每小时运行两次（00 分和 30 分）
+    - cron: '*/1 * * * *'  # 每 1 分钟运行一次
 
 env:
   TZ: Asia/Shanghai
