@@ -1,33 +1,30 @@
-name: Auto Check IPTV Pro
+name: AutoFetchIPTV
 
 on:
   schedule:
-    - cron: '*/6 * * * *'  # 每6分钟自动运行
-  workflow_dispatch:
+    - cron: '*/6 * * * *'  # 每 6 分钟运行一次
+  workflow_dispatch:        # 手动运行支持
 
 env:
   TZ: Asia/Shanghai
 
 jobs:
-  validate_iptv:
+  fetch:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
+    - name: Checkout repo
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
         persist-credentials: false
 
-    - name: Prepare and collect links
+    - name: Set time
+      run: echo "GET_TIME=$(date +'%Y-%m-%d %H:%M:%S CST')" >> $GITHUB_ENV
+
+    - name: Download and save IPTV files
       run: |
-        mkdir -p temp
-        cd temp
-        > ../ALL_IPTV.m3u
-        echo "#EXTM3U" > ../ALL_IPTV.m3u
-        > ../invalid.txt
-        > ../iptv.log
-        > all_blocks.txt
+        echo "📦 开始采集所有链接..."
 
         LINKS=(
           "https://raw.githubusercontent.com/kiki4177/iptv/main/JSS"
@@ -36,61 +33,37 @@ jobs:
           "https://raw.githubusercontent.com/kfwong15/ABC/refs/heads/main/owntv"
         )
 
-        for url in "${LINKS[@]}"; do
-          fname=$(echo "$url" | sed 's|https://||;s|/|_|g')
-          curl -sL "$url" -o "$fname"
-          echo "🔗 下载完成: $fname"
+        for IPTV_URL in "${LINKS[@]}"; do
+          echo "✅ 处理链接: $IPTV_URL"
 
-          # 判断是否是 M3U 格式
-          if grep -q "#EXTINF" "$fname"; then
-            awk -v RS='#EXTINF' 'NR>1{print "#EXTINF" $0}' "$fname" | while read -r block; do
-              name=$(echo "$block" | grep -oP '(?<=,).*' | head -1 | tr -d '\r')
-              link=$(echo "$block" | tail -n1 | tr -d '\r')
-              if [[ "$link" =~ \.m3u8$ || "$link" =~ \.mpd$ ]]; then
-                echo "$name|||$link|||$block" >> all_blocks.txt
-              fi
-            done
-          else
-            # 如果没有EXTINF，也尝试提取 .m3u8 / .mpd 播放链接
-            grep -Eo 'https?://[^"]+\.(m3u8|mpd)' "$fname" | while read -r link; do
-              name=$(basename "$link")
-              echo "#EXTINF:-1,$name" > tempblock.txt
-              echo "$link" >> tempblock.txt
-              block=$(cat tempblock.txt)
-              echo "$name|||$link|||$block" >> all_blocks.txt
-            done
+          # 自动生成文件名（如 kiki4177_iptv_main_JSS.m3u）
+          FILE_NAME=$(echo "$IPTV_URL" | sed 's|https://raw.githubusercontent.com/||' | sed 's|/|_|g').m3u
+          echo "📄 文件名为: $FILE_NAME"
+
+          # 下载文件
+          wget -q "$IPTV_URL" -O "$FILE_NAME"
+
+          # 检查是否成功
+          if [ ! -s "$FILE_NAME" ]; then
+            echo "❌ 失败或文件为空: $FILE_NAME"
+            continue
           fi
+
+          # 添加 #EXTM3U 开头（如没有）
+          grep -q "^#EXTM3U" "$FILE_NAME" || sed -i '1i #EXTM3U' "$FILE_NAME"
+
+          echo "✅ 成功保存 $FILE_NAME"
         done
 
-    - name: Validate IPTV (multi-threaded)
-      run: |
-        cd temp
-        awk -F '|||' '!a[$1]++' all_blocks.txt > unique_blocks.txt
+        # 更新 README.md 显示最后更新时间
+        echo "📅 Last updated at ${GET_TIME}" > README.md
 
-        cat unique_blocks.txt | cut -d '|||' -f2 | \
-        xargs -I {} -P 10 bash -c '
-          url="$1"
-          name=$(grep "$url" unique_blocks.txt | head -1 | cut -d "|||" -f1)
-          block=$(grep "$url" unique_blocks.txt | head -1 | cut -d "|||" -f3-)
-          if curl -s --head --max-time 5 -A "Mozilla/5.0" -e "https://www.google.com" "$url" | grep -q "200 OK"; then
-            echo "$block" >> ../ALL_IPTV.m3u
-            echo "✅ $name OK" >> ../iptv.log
-          else
-            echo "$name <$url>" >> ../invalid.txt
-            echo "❌ $name FAIL" >> ../iptv.log
-          fi
-        ' _ {}
-
-    - name: Write update time
-      run: |
-        echo "📅 最后更新时间: $(date +'%Y-%m-%d %H:%M:%S')" > README.md
-
-    - name: Commit & Push
+    - name: Commit and push to GitHub
       run: |
         git config --global user.name "kfwong15"
         git config --global user.email "kfwong15@users.noreply.github.com"
-        git pull origin main || true
-        git add ALL_IPTV.m3u invalid.txt README.md iptv.log || true
-        git commit -m "🎯 Auto update at $(date +'%Y-%m-%d %H:%M:%S')" || echo "No changes"
+
+        git add . || echo "⚠️ 无需添加"
+        git commit -m "🎯 Auto fetch at ${GET_TIME}" || echo "✅ 无需提交"
         git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-        git push || echo "No changes to push"
+        git push || echo "✅ 无需推送"
