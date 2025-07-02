@@ -22,7 +22,7 @@ jobs:
     - name: Get current time
       run: echo "GET_TIME=$(date +'%Y-%m-%d %H:%M:%S CST')" >> $GITHUB_ENV
 
-    - name: Download, Clean and Merge M3U Files
+    - name: Download, Clean, Validate and Merge M3U Files
       run: |
         LINKS=(
           "https://raw.githubusercontent.com/kiki4177/iptv/main/JSS"
@@ -44,31 +44,8 @@ jobs:
             grep -q "^#EXTM3U" "$FILE_NAME" || sed -i '1i #EXTM3U' "$FILE_NAME"
             sed -i '/^\s*$/d' "$FILE_NAME"
 
-            # 将频道逐个去重合并
             awk -v RS='#EXTINF' 'NR>1{print "#EXTINF" $0}' "$FILE_NAME" | while read -r block; do
               NAME=$(echo "$block" | grep -oP '(?<=,).*' | head -1)
-              if ! grep -q ",$NAME$" "$TEMP_ALL"; then
-                echo "$block" >> "$TEMP_ALL"
-              else
-                echo "⚠️ 重复频道：$NAME，已跳过"
-              fi
-            done
-          else
-            echo "❌ 文件为空或下载失败：$FILE_NAME"
-          fi
-        done
+              URL_LINE=$(echo "$block" | tail -n1)
 
-        cat "$TEMP_ALL" >> ALL_IPTV.m3u
-        rm -f "$TEMP_ALL"
-
-        echo "Auto update at ${GET_TIME}" > README.md
-
-    - name: Commit and push
-      run: |
-        git config --global user.name "kfwong15"
-        git config --global user.email "kfwong15@users.noreply.github.com"
-
-        git add *.m3u README.md || echo "⚠️ 没有变化"
-        git commit -m "Auto update at ${GET_TIME}" || echo "✅ 无需提交"
-        git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-        git push || echo "✅ 无需推送"
+              if curl -s --head --fail --
