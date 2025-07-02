@@ -3,7 +3,7 @@ name: Update
 on:
   schedule:
     - cron: '*/6 * * * *'  # 每6分钟运行一次
-  workflow_dispatch:        # 支持手动运行
+  workflow_dispatch:
 
 env:
   TZ: Asia/Shanghai
@@ -13,10 +13,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
+    - name: Checkout Files Branch (or create)
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
+        ref: Files  # 直接 checkout 到 Files 分支
         persist-credentials: false
 
     - name: Get Time
@@ -43,9 +44,7 @@ jobs:
         cat CCTV.m3u CNTV.m3u > IPTV.m3u
         echo "#EXTM3U" | cat - IPTV.m3u > temp && mv temp IPTV.m3u
 
-        # 下载 EPG
         wget https://epg.112114.xyz/pp.xml -O EPG.xml || true
-
         echo "Auto Update IPTV in ${GET_TIME}" > README.md
 
     - name: Debug File Output
@@ -57,19 +56,12 @@ jobs:
         echo "====== EPG 预览 ======"
         head -n 10 EPG.xml || echo "EPG.xml 未生成"
 
-    - name: Push to Files Branch
+    - name: Commit & Push
       run: |
         git config --global user.name "kfwong15"
         git config --global user.email "kfwong15@users.noreply.github.com"
 
-        # 使用孤立分支避免冲突
-        git checkout --orphan Files || git checkout -B Files
-        git reset --hard
-        git clean -fdx
-
-        touch CCTV.m3u CNTV.m3u IPTV.m3u EPG.xml README.md
-
-        git add CCTV.m3u CNTV.m3u IPTV.m3u EPG.xml README.md
-        git commit -m "${GET_TIME}" || echo "No changes"
+        git add CCTV.m3u CNTV.m3u IPTV.m3u EPG.xml README.md || echo "Nothing to add"
+        git commit -m "${GET_TIME}" || echo "No changes to commit"
         git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/kfwong15/autoiptv.git
-        git push -f origin Files
+        git push origin Files
