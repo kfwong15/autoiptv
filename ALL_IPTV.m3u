@@ -161,146 +161,134 @@ Sila isi URL dalam ott ikut step. bukan click link ini
 ########中国移动源############
 ###wangxiao5596/IPTV####
 
-#EXTM3U url-tvg="https://epg.51zmt.top:8001/e.xml"
 
-#EXTM3U
-#EXTINF:-1 tvg-id="CCTV1" group-title="中国",CCTV1 综合
-https://hls-gateway.vpstv.net/streams/476879.m3u8
-#EXTINF:-1 tvg-id="CCTV2" group-title="中国",CCTV2 财经
-https://hls-gateway.vpstv.net/streams/476881.m3u8
-#EXTINF:-1 tvg-id="CCTV3" group-title="中国",CCTV3 综艺
-https://hls-gateway.vpstv.net/streams/476883.m3u8
-#EXTINF:-1 tvg-id="CCTV4" group-title="中国",CCTV4 中文国际
-https://hls-gateway.vpstv.net/streams/476885.m3u8
 
-#EXTM3U url-tvg="http://example.com/epg.xml"
-#EXTINF:-1 tvg-id="CCTV4" tvg-name="CCTV4" tvg-logo="" group-title="中国电视大全",CCTV4
+
+#EXTM3U url-tvg="https://epgshare01.online/epgshare01/epg_ripper_ALL_SOURCES1.xml.gz"
+
+# --------------------
+# 中国频道_移动源
+# --------------------
+#EXTINF:-1 tvg-id="CCTV1" group-title="中国频道_移动源",CCTV1 综合
+http://183.221.193.148:4022/rtp/239.11.0.65:5140
+#EXTINF:-1 tvg-id="CCTV2" group-title="中国频道_移动源",CCTV2 财经
+http://183.221.193.148:4022/rtp/239.11.0.108:5140
+#EXTINF:-1 tvg-id="CCTV3" group-title="中国频道_移动源",CCTV3 综艺
+http://183.221.193.148:4022/rtp/239.11.0.101:5140
+#EXTINF:-1 tvg-id="CCTV4" group-title="中国频道_移动源",CCTV4 中文国际
 http://183.221.193.148:4022/rtp/239.11.0.109:5140
-#EXTINF:-1 tvg-id="CCTV5" tvg-name="CCTV5" tvg-logo="" group-title="中国电视大全",CCTV5
+#EXTINF:-1 tvg-id="CCTV5" group-title="中国频道_移动源",CCTV5 体育
 http://183.221.193.148:4022/rtp/239.11.0.100:5140
-#EXTINF:-1 tvg-id="CCTV6" tvg-name="CCTV6" tvg-logo="" group-title="中国电视大全",CCTV6
+#EXTINF:-1 tvg-id="CCTV6" group-title="中国频道_移动源",CCTV6 电影
 http://183.221.193.148:4022/rtp/239.11.0.102:5140
-#EXTINF:-1 tvg-id="CCTV7" tvg-name="CCTV7" tvg-logo="" group-title="中国电视大全",CCTV7
+#EXTINF:-1 tvg-id="CCTV7" group-title="中国频道_移动源",CCTV7 国防
 http://183.221.193.148:4022/rtp/239.11.0.110:5140
-#EXTINF:-1 tvg-id="CCTV8" tvg-name="CCTV8" tvg-logo="" group-title="中国电视大全",CCTV8
+#EXTINF:-1 tvg-id="CCTV8" group-title="中国频道_移动源",CCTV8 电视剧
 http://183.221.193.148:4022/rtp/239.11.0.103:5140
-#EXTINF:-1 tvg-id="CCTV9" tvg-name="CCTV9" tvg-logo="" group-title="中国电视大全",CCTV9
+#EXTINF:-1 tvg-id="CCTV9" group-title="中国频道_移动源",CCTV9 纪录
 http://183.221.193.148:4022/rtp/239.11.0.111:5140
-#EXTINF:-1 tvg-id="CCTV10" tvg-name="CCTV10" tvg-logo="" group-title="中国电视大全",CCTV10
+#EXTINF:-1 tvg-id="CCTV10" group-title="中国频道_移动源",CCTV10 科教
 http://183.221.193.148:4022/rtp/239.11.0.112:5140
-#EXTINF:-1 tvg-id="CCTV11" tvg-name="CCTV11" tvg-logo="" group-title="中国电视大全",CCTV11
+#EXTINF:-1 tvg-id="CCTV11" group-title="中国频道_移动源",CCTV11 戏曲
 http://183.221.193.148:4022/rtp/239.11.0.22:5140
-#EXTINF:-1 tvg-id="CCTV12" tvg-name="CCTV12" tvg-logo="" group-title="中国电视大全",CCTV12
+#EXTINF:-1 tvg-id="CCTV12" group-title="中国频道_移动源",CCTV12 社会法制
 http://183.221.193.148:4022/rtp/239.11.0.113:5140
-#EXTINF:-1 tvg-id="CCTV13" tvg-name="CCTV13" tvg-logo="" group-title="中国电视大全",CCTV13
+#EXTINF:-1 tvg-id="CCTV13" group-title="中国频道_移动源",CCTV13 新闻
 http://183.221.193.148:4022/rtp/239.11.0.24:5140
-#EXTINF:-1 tvg-id="CCTV14" tvg-name="CCTV14" tvg-logo="" group-title="中国电视大全",CCTV14
+#EXTINF:-1 tvg-id="CCTV14" group-title="中国频道_移动源",CCTV14 少儿
 http://183.221.193.148:4022/rtp/239.11.0.114:5140
-#EXTINF:-1 tvg-id="CCTV15" tvg-name="CCTV15" tvg-logo="" group-title="中国电视大全",CCTV15
+#EXTINF:-1 tvg-id="CCTV15" group-title="中国频道_移动源",CCTV15 音乐
 http://183.221.193.148:4022/rtp/239.11.0.26:5140
-#EXTINF:-1 tvg-id="CCTV17" tvg-name="CCTV17" tvg-logo="" group-title="中国电视大全",CCTV17
+#EXTINF:-1 tvg-id="CCTV17" group-title="中国频道_移动源",CCTV17 农业农村
 http://183.221.193.148:4022/rtp/239.11.0.107:5140
-
-
-
-
-
-
-
-
-
-#EXTINF:-1 group-title="中国电视大全",CGTN
+#EXTINF:-1 tvg-id="CGTN" group-title="中国频道_移动源",CGTN 国际新闻
 http://183.221.193.148:4022/rtp/239.11.0.138:5140
-#EXTINF:-1 group-title="中国电视大全",湖南卫视
+#EXTINF:-1 tvg-id="HunanTV" group-title="中国频道_移动源",湖南卫视
 http://183.221.193.148:4022/rtp/239.11.0.119:5140
-#EXTINF:-1 group-title="中国电视大全",浙江卫视
+#EXTINF:-1 tvg-id="ZJTV" group-title="中国频道_移动源",浙江卫视
 http://183.221.193.148:4022/rtp/239.11.0.70:5140
-#EXTINF:-1 group-title="中国电视大全",江苏卫视
+#EXTINF:-1 tvg-id="JSTV" group-title="中国频道_移动源",江苏卫视
 http://183.221.193.148:4022/rtp/239.11.0.76:5140
-#EXTINF:-1 group-title="中国电视大全",北京卫视
+#EXTINF:-1 tvg-id="BTV" group-title="中国频道_移动源",北京卫视
 http://183.221.193.148:4022/rtp/239.11.0.121:5140
-#EXTINF:-1 group-title="中国电视大全",江西卫视
-http://183.221.193.148:4022/rtp/239.11.0.42:5140
-#EXTINF:-1 group-title="中国电视大全",广东卫视
+#EXTINF:-1 tvg-id="GDTV" group-title="中国频道_移动源",广东卫视
 http://183.221.193.148:4022/rtp/239.11.0.115:5140
-#EXTINF:-1 group-title="中国电视大全",深圳卫视
-http://183.221.193.148:4022/rtp/239.11.0.71:5140
-#EXTINF:-1 group-title="中国电视大全",东方卫视
-http://183.221.193.148:4022/rtp/239.11.0.68:5140
-#EXTINF:-1 group-title="中国电视大全",海南卫视
-http://183.221.193.148:4022/rtp/239.11.0.193:5140
-#EXTINF:-1 group-title="中国电视大全",天津卫视
-http://183.221.193.148:4022/rtp/239.11.0.123:5140
-#EXTINF:-1 group-title="中国电视大全",重庆卫视
-http://183.221.193.148:4022/rtp/239.11.0.116:5140
-#EXTINF:-1 group-title="中国电视大全",辽宁卫视
-http://183.221.193.148:4022/rtp/239.11.0.118:5140
-#EXTINF:-1 group-title="中国电视大全",东南卫视
-http://183.221.193.148:4022/rtp/239.11.0.41:5140
-#EXTINF:-1 group-title="中国电视大全",广西卫视
-http://183.221.193.148:4022/rtp/239.11.0.48:5140
-#EXTINF:-1 group-title="中国电视大全",河北卫视
-http://183.221.193.148:4022/rtp/239.11.0.31:5140
-#EXTINF:-1 group-title="中国电视大全",山西卫视
-http://183.221.193.148:4022/rtp/239.11.0.32:5140
-#EXTINF:-1 group-title="中国电视大全",陕西卫视
-http://183.221.193.148:4022/rtp/239.11.0.54:5140
-#EXTINF:-1 group-title="中国电视大全",贵州卫视
-http://183.221.193.148:4022/rtp/239.11.0.51:5140
-#EXTINF:-1 group-title="中国电视大全",湖北卫视
-http://183.221.193.148:4022/rtp/239.11.0.74:5140
-#EXTINF:-1 group-title="中国电视大全",青海卫视
-http://183.221.193.148:4022/rtp/239.11.0.56:5140
-#EXTINF:-1 group-title="中国电视大全",河南卫视
-http://183.221.193.148:4022/rtp/239.11.0.44:5140
-#EXTINF:-1 group-title="中国电视大全",山东卫视
-http://183.221.193.148:4022/rtp/239.11.0.73:5140
-#EXTINF:-1 group-title="中国电视大全",安徽卫视
-http://183.221.193.148:4022/rtp/239.11.0.117:5140
-#EXTINF:-1 group-title="中国电视大全",宁夏卫视
-http://183.221.193.148:4022/rtp/239.11.0.57:5140
-#EXTINF:-1 group-title="中国电视大全",甘肃卫视
-http://183.221.193.148:4022/rtp/239.11.0.55:5140
-#EXTINF:-1 group-title="中国电视大全",西藏卫视
-http://183.221.193.148:4022/rtp/239.11.0.53:5140
-#EXTINF:-1 group-title="中国电视大全",内蒙古卫视
-http://183.221.193.148:4022/rtp/239.11.0.33:5140
-#EXTINF:-1 group-title="中国电视大全",吉林卫视
-http://183.221.193.148:4022/rtp/239.11.0.35:5140
-#EXTINF:-1 group-title="中国电视大全",新疆卫视
-http://183.221.193.148:4022/rtp/239.11.0.58:5140
-#EXTINF:-1 group-title="中国电视大全",兵团卫视
-http://183.221.193.148:4022/rtp/239.11.0.204:5140
-#EXTINF:-1 group-title="中国电视大全",云南卫视
-http://183.221.193.148:4022/rtp/239.11.0.52:5140
-#EXTINF:-1 group-title="中国电视大全",黑龙江卫视
-http://183.221.193.148:4022/rtp/239.11.0.36:5140
-#EXTINF:-1 group-title="中国电视大全",金鹰卡通
-http://183.221.193.148:4022/rtp/239.11.0.127:5140
-#EXTINF:-1 group-title="中国电视大全",卡酷少儿
-http://183.221.193.148:4022/rtp/239.11.0.129:5140
-#EXTINF:-1 group-title="中国电视大全",嘉佳卡通
-http://183.221.193.148:4022/rtp/239.11.0.203:5140
-#EXTINF:-1 group-title="中国电视大全",优漫卡通
-http://183.221.193.148:4022/rtp/239.11.0.63:5140
-#EXTINF:-1 group-title="中国电视大全",哈哈炫动
-http://183.221.193.148:4022/rtp/239.11.0.64:5140
-#EXTINF:-1 group-title="中国电视大全",真4K
-http://183.221.193.148:4022/rtp/239.11.0.122:5140
-#EXTINF:-1 group-title="中国电视大全",看电影
-http://183.221.193.148:4022/rtp/239.11.0.191:5140
-#EXTINF:-1 group-title="中国电视大全",CETV1
-http://183.221.193.148:4022/rtp/239.11.0.139:5140
-#EXTINF:-1 group-title="中国电视大全",CETV2
-http://183.221.193.148:4022/rtp/239.11.0.246:5140
-#EXTINF:-1 group-title="中国电视大全",CETV3
-http://183.221.193.148:4022/rtp/239.11.0.247:5140
-#EXTINF:-1 group-title="中国电视大全",CETV4
-http://183.221.193.148:4022/rtp/239.11.0.248:5140
 
+# --------------------
+# 中国频道_电信源
+# --------------------
+#EXTINF:-1 tvg-id="CCTV1" group-title="中国频道_电信源",CCTV1 综合
+http://60.172.83.86:8686/rtp/238.1.78.166:7200
+#EXTINF:-1 tvg-id="CCTV2" group-title="中国频道_电信源",CCTV2 财经
+http://60.172.83.86:8686/rtp/238.1.78.235:7752
+#EXTINF:-1 tvg-id="CCTV3" group-title="中国频道_电信源",CCTV3 综艺
+http://60.172.83.86:8686/rtp/238.1.78.170:7232
+#EXTINF:-1 tvg-id="CCTV4" group-title="中国频道_电信源",CCTV4 中文国际
+http://60.172.83.86:8686/rtp/238.1.78.236:7760
+#EXTINF:-1 tvg-id="CCTV5" group-title="中国频道_电信源",CCTV5 体育
+http://60.172.83.86:8686/rtp/238.1.78.171:7240
+#EXTINF:-1 tvg-id="CCTV5plus" group-title="中国频道_电信源",CCTV5+ 体育赛事
+http://60.172.83.86:8686/rtp/238.1.78.237:7768
+#EXTINF:-1 tvg-id="CCTV6" group-title="中国频道_电信源",CCTV6 电影
+http://60.172.83.86:8686/rtp/238.1.78.172:7248
+#EXTINF:-1 tvg-id="CCTV7" group-title="中国频道_电信源",CCTV7 国防
+http://60.172.83.86:8686/rtp/238.1.78.239:7784
+#EXTINF:-1 tvg-id="CCTV8" group-title="中国频道_电信源",CCTV8 电视剧
+http://60.172.83.86:8686/rtp/238.1.78.173:7256
+#EXTINF:-1 tvg-id="CCTV9" group-title="中国频道_电信源",CCTV9 纪录
+http://60.172.83.86:8686/rtp/238.1.78.240:7792
+#EXTINF:-1 tvg-id="CCTV10" group-title="中国频道_电信源",CCTV10 科教
+http://60.172.83.86:8686/rtp/238.1.78.241:7800
+#EXTINF:-1 tvg-id="CCTV11" group-title="中国频道_电信源",CCTV11 戏曲
+http://60.172.83.86:8686/rtp/238.1.78.206:7502
+#EXTINF:-1 tvg-id="CCTV12" group-title="中国频道_电信源",CCTV12 社会法制
+http://60.172.83.86:8686/rtp/238.1.78.242:7808
+#EXTINF:-1 tvg-id="CCTV13" group-title="中国频道_电信源",CCTV13 新闻
+http://60.172.83.86:8686/rtp/238.1.79.35:4392
+#EXTINF:-1 tvg-id="CCTV14" group-title="中国频道_电信源",CCTV14 少儿
+http://60.172.83.86:8686/rtp/238.1.78.243:7816
+#EXTINF:-1 tvg-id="CCTV15" group-title="中国频道_电信源",CCTV15 音乐
+http://60.172.83.86:8686/rtp/238.1.78.222:7648
+#EXTINF:-1 tvg-id="CCTV17" group-title="中国频道_电信源",CCTV17 农业农村
+http://60.172.83.86:8686/rtp/238.1.78.178:7296
+#EXTINF:-1 tvg-id="CGTN" group-title="中国频道_电信源",CGTN 国际新闻
+http://60.172.83.86:8686/rtp/238.1.78.50:6272
 
-
-
+# --------------------
+# 中国频道_三网源
+# --------------------
+#EXTINF:-1 tvg-id="CCTV1" group-title="中国频道_三网源",CCTV1
+http://qwt.zhibotv.top:2016/%E5%85%A8%E7%BD%91%E9%80%9A.php?id=CCTV1
+#EXTINF:-1 tvg-id="CCTV2" group-title="中国频道_三网源",CCTV2
+http://qwt.zhibotv.top:2016/%E5%85%A8%E7%BD%91%E9%80%9A.php?id=CCTV2
+#EXTINF:-1 tvg-id="CCTV3" group-title="中国频道_三网源",CCTV3
+http://qwt.zhibotv.top:2016/%E5%85%A8%E7%BD%91%E9%80%9A.php?id=CCTV3
+#EXTINF:-1 tvg-id="CCTV4" group-title="中国频道_三网源",CCTV4
+http://qwt.zhibotv.top:2016/%E5%85%A8%E7%BD%91%E9%80%9A.php?id=CCTV4
+#EXTINF:-1 tvg-id="CCTV5" group-title="中国频道_三网源",CCTV5
+http://qwt.zhibotv.top:2016/%E5%85%A8%E7%BD%91%E9%80%9A.php?id=CCTV5
+#EXTINF:-1 tvg-id="CCTV6" group-title="中国频道_三网源",CCTV6
+http://qwt.zhibotv.top:2016/%E5%85%A8%E7%BD%91%E9%80%9A.php?id=CCTV6
+#EXTINF:-1 tvg-id="CCTV7" group-title="中国频道_三网源",CCTV7
+http://qwt.zhibotv.top:2016/%E5%85%A8%E7%BD%91%E9%80%9A.php?id=CCTV7
+#EXTINF:-1 tvg-id="CCTV8" group-title="中国频道_三网源",CCTV8
+http://qwt.zhibotv.top:2016/%E5%85%A8%E7%BD%91%E9%80%9A.php?id=CCTV8
+#EXTINF:-1 tvg-id="CCTV9" group-title="中国频道_三网源",CCTV9
+http://qwt.zhibotv.top:2016/%E5%85%A8%E7%BD%91%E9%80%9A.php?id=CCTV9
+#EXTINF:-1 tvg-id="CCTV10" group-title="中国频道_三网源",CCTV10
+http://qwt.zhibotv.top:2016/%E5%85%A8%E7%BD%91%E9%80%9A.php?id=CCTV10
+#EXTINF:-1 tvg-id="CCTV11" group-title="中国频道_三网源",CCTV11
+http://qwt.zhibotv.top:2016/%E5%85%A8%E7%BD%91%E9%80%9A.php?id=CCTV11
+#EXTINF:-1 tvg-id="CCTV12" group-title="中国频道_三网源",CCTV12
+http://qwt.zhibotv.top:2016/%E5%85%A8%E7%BD%91%E9%80%9A.php?id=CCTV12
+#EXTINF:-1 tvg-id="CCTV13" group-title="中国频道_三网源",CCTV13
+http://qwt.zhibotv.top:2016/%E5%85%A8%E7%BD%91%E9%80%9A.php?id=CCTV13
+#EXTINF:-1 tvg-id="CCTV14" group-title="中国频道_三网源",CCTV14
+http://qwt.zhibotv.top:2016/%E5%85%A8%E7%BD%91%E9%80%9A.php?id=CCTV14
+#EXTINF:-1 tvg-id="CCTV15" group-title="中国频道_三网源",CCTV15
+http://qwt.zhibotv.top:2016/%E5%85%A8%E7%BD%91%E9%80%9A.php?id=CCTV15
+#EXTINF:-1 tvg-id="CCTV17" group-title="中国频道_三网源",CCTV17
+http://qwt.zhibotv.top:2016/%E5%85%A8%E7%BD%91%E9%80%9A.php?id=CCTV17
 
 
 
