@@ -3,7 +3,7 @@ name: AutoFetchIPTV
 on:
   schedule:
     - cron: '*/6 * * * *'  # 每 6 分钟运行一次
-  workflow_dispatch:        # 手动运行支持
+  workflow_dispatch:
 
 env:
   TZ: Asia/Shanghai
@@ -23,22 +23,28 @@ jobs:
     - name: Get Time
       run: echo "GET_TIME=$(date +'%Y-%m-%d %H:%M:%S CST')" >> $GITHUB_ENV
 
-    - name: Download IPTV and Save to Custom Filename
+    - name: Download and Create File from URL
       run: |
-        echo "📥 采集链接：$IPTV_URL"
+        echo "📥 下载链接：$IPTV_URL"
 
-        # 自动生成文件名：把域名后的路径用 _ 替代 /
+        # 提取文件名，确保不会为空
         FILE_NAME=$(echo "$IPTV_URL" | sed 's|https://raw.githubusercontent.com/||' | sed 's|/|_|g')
 
-        echo "📄 保存为文件：$FILE_NAME"
+        # 验证文件名
+        if [ -z "$FILE_NAME" ]; then
+          echo "❌ 无法生成文件名，终止"
+          exit 1
+        fi
 
-        # 下载并保存
+        echo "📄 保存文件为：$FILE_NAME"
+
+        # 下载
         wget "$IPTV_URL" -O "$FILE_NAME" || echo "" > "$FILE_NAME"
 
-        # 添加 #EXTM3U 标头
+        # 添加头部
         grep -q "^#EXTM3U" "$FILE_NAME" || sed -i '1i #EXTM3U' "$FILE_NAME"
 
-        # 写入更新时间说明
+        # 写入更新说明
         echo "Auto update at ${GET_TIME}" > README.md
 
     - name: Commit and Push
@@ -46,7 +52,12 @@ jobs:
         git config --global user.name "kfwong15"
         git config --global user.email "kfwong15@users.noreply.github.com"
 
-        git add "$FILE_NAME" README.md
-        git commit -m "Updated $FILE_NAME at ${GET_TIME}" || echo "✅ 无需提交"
-        git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-        git push || echo "✅ 无需推送"
+        # 安全 add：确保文件存在
+        if [ -f "$FILE_NAME" ]; then
+          git add "$FILE_NAME" README.md
+          git commit -m "Updated $FILE_NAME at ${GET_TIME}" || echo "✅ 无需提交"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git push || echo "✅ 无需推送"
+        else
+          echo "⚠️ 文件不存在，跳过提交"
+        fi
