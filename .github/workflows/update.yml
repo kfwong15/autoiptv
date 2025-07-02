@@ -1,9 +1,9 @@
 name: Update
 
 on:
-  push:
   schedule:
-    - cron: '*/1 * * * *'
+    - cron: '*/1 * * * *'   # 每分钟运行
+  workflow_dispatch:        # 手动触发按钮
 
 env:
   TZ: Asia/Shanghai
@@ -16,55 +16,48 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
       with:
-        persist-credentials: false
         fetch-depth: 0
+        persist-credentials: false
 
-    - name: GetTime
+    - name: Get Time
       run: echo "GET_TIME=$(date +'%Y-%m-%d %H:%M:%S CST')" >> $GITHUB_ENV
 
-    - name: Generate IPTV Files and Save to _temp
+    - name: Generate IPTV Files
       run: |
-        mkdir -p _temp
-        wget https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/ipv6.m3u -O _temp/source.m3u || true
+        wget https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/ipv6.m3u -O source.m3u || true
 
-        grep -A1 "央视" _temp/source.m3u > _temp/CCTV.m3u || echo "" > _temp/CCTV.m3u
-        sed -i '1i #EXTM3U' _temp/CCTV.m3u
-        sed -i '/^\s*$/d' _temp/CCTV.m3u
+        grep -A1 "央视" source.m3u > CCTV.m3u || true
+        grep -A1 "卫视" source.m3u > CNTV1.m3u || true
+        grep -A1 "数字" source.m3u > CNTV2.m3u || true
+        grep -A1 "百视" source.m3u > CNTV3.m3u || true
 
-        grep -A1 "卫视" _temp/source.m3u > _temp/CNTV1.m3u || true
-        grep -A1 "数字" _temp/source.m3u > _temp/CNTV2.m3u || true
-        grep -A1 "百视" _temp/source.m3u > _temp/CNTV3.m3u || true
-        cat _temp/CNTV1.m3u _temp/CNTV2.m3u _temp/CNTV3.m3u > _temp/CNTV.m3u
-        sed -i '1i #EXTM3U' _temp/CNTV.m3u
-        sed -i '/^\s*$/d' _temp/CNTV.m3u
-        rm -f _temp/CNTV1.m3u _temp/CNTV2.m3u _temp/CNTV3.m3u
+        cat CNTV1.m3u CNTV2.m3u CNTV3.m3u > CNTV.m3u || true
+        echo "#EXTM3U" | cat - CCTV.m3u > temp && mv temp CCTV.m3u
+        echo "#EXTM3U" | cat - CNTV.m3u > temp && mv temp CNTV.m3u
 
-        cat _temp/CCTV.m3u _temp/CNTV.m3u > _temp/IPTV.m3u
-        sed -i '/#EXTM3U/d' _temp/IPTV.m3u
-        sed -i '1i #EXTM3U' _temp/IPTV.m3u
-        sed -i '/^\s*$/d' _temp/IPTV.m3u
+        cat CCTV.m3u CNTV.m3u > IPTV.m3u
+        echo "#EXTM3U" | cat - IPTV.m3u > temp && mv temp IPTV.m3u
 
-        wget https://epg.112114.xyz/pp.xml -O _temp/EPG.xml || true
+        rm -f CNTV1.m3u CNTV2.m3u CNTV3.m3u source.m3u
+        wget https://epg.112114.xyz/pp.xml -O EPG.xml || true
+        echo "Auto Update IPTV in ${GET_TIME}" > README.md
 
-        echo "Auto Update IPTV in ${GET_TIME}" > _temp/README.md
-
-    - name: Push to Files Branch (via temp)
+    - name: Push to Files branch (clean + force)
       run: |
         git config --global user.name "kfwong15"
         git config --global user.email "kfwong15@users.noreply.github.com"
 
-        # 新建分支
-        git checkout --orphan Files
+        # 在当前目录提交并推送到 Files 分支
+        git checkout --orphan Files || git checkout -B Files
         git reset --hard
         git clean -fdx
 
-        # 恢复生成的文件
-        cp _temp/* ./
-
-        echo "最终文件列表："
+        echo "== 显示文件列表 =="
         ls -al
 
-        git add .
-        git commit -m "${GET_TIME}" || echo "No changes to commit"
+        touch CCTV.m3u CNTV.m3u IPTV.m3u EPG.xml README.md
+
+        git add CCTV.m3u CNTV.m3u IPTV.m3u EPG.xml README.md
+        git commit -m "${GET_TIME}" || echo "No changes"
         git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/kfwong15/autoiptv.git
         git push -f origin Files
