@@ -3,7 +3,7 @@ name: Update
 on:
   push:
   schedule:
-    - cron: 0,30 * * * *
+    - cron: 0,30 * * * *  # 每小时两次自动运行
 
 env:
   TZ: Asia/Shanghai
@@ -11,6 +11,7 @@ env:
 jobs:
   Update:
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -18,7 +19,7 @@ jobs:
     - name: GetTime
       run: echo "GET_TIME=$(date +'%Y-%m-%d %H:%M:%S CST')" >> $GITHUB_ENV
 
-    - name: Update
+    - name: Update IPTV Files
       run: |
         # 央视源
         rm -f CCTV.m3u && wget https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/ipv6.m3u -O CCTV.m3u
@@ -31,9 +32,7 @@ jobs:
         wget https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/ipv6.m3u -O CNTV1.m3u && sed -i -n '/卫视/,+1p' CNTV1.m3u
         wget https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/ipv6.m3u -O CNTV2.m3u && sed -i -n '/数字/,+1p' CNTV2.m3u
         wget https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/ipv6.m3u -O CNTV3.m3u && sed -i -n '/百视/,+1p' CNTV3.m3u
-        cat CNTV1.m3u >> CNTV.m3u
-        cat CNTV2.m3u >> CNTV.m3u
-        cat CNTV3.m3u >> CNTV.m3u
+        cat CNTV1.m3u CNTV2.m3u CNTV3.m3u > CNTV.m3u
         rm -f CNTV1.m3u CNTV2.m3u CNTV3.m3u
         sed -i '1i #EXTM3U' CNTV.m3u
         sed -i '/^\s*$/d' CNTV.m3u
@@ -47,34 +46,23 @@ jobs:
 
         # 整合源
         rm -f IPTV.m3u && touch IPTV.m3u
-        cat CCTV.m3u >> IPTV.m3u
-        cat CNTV.m3u >> IPTV.m3u
-        cat Adult.m3u >> IPTV.m3u
+        cat CCTV.m3u CNTV.m3u Adult.m3u >> IPTV.m3u
         sed -i '/#EXTM3U/d' IPTV.m3u
         sed -i '1i #EXTM3U' IPTV.m3u
         sed -i '/^\s*$/d' IPTV.m3u
 
         # 节目源
         rm -f EPG.xml && wget https://epg.112114.xyz/pp.xml -O EPG.xml
+
+        # 更新说明
         echo "Auto Update IPTV in ${GET_TIME}" > README.md
 
-    - name: Clean and Push Files branch
+    - name: Push to Files Branch
       run: |
-        git config --local user.email "github-actions[bot]@users.noreply.github.com"
-        git config --local user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "github-actions[bot]"
         git checkout --orphan latest_branch
         git add -A
-        git commit -am "${GET_TIME}"
+        git commit -m "${GET_TIME}"
+        git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
         git push -f origin latest_branch:Files
-        
-            - name: Push to Files branch
-      env:
-        TOKEN: ${{ secrets.PAT }}
-      run: |
-        git remote set-url origin https://kfwong15:${TOKEN}@github.com/kfwong15/autoiptv.git
-        git push -f origin latest_branch:Files
-        
-        
-        
-        
-        
