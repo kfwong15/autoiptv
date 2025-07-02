@@ -37,11 +37,12 @@ jobs:
         )
 
         for url in "${LINKS[@]}"; do
-          fname=$(echo "$url" | sed 's|https://||; s|/|_|g').m3u
-          echo "📥 下载：$url → $fname"
+          fname=$(echo "$url" | sed 's|https://||;s|/|_|g')
           curl -sL "$url" -o "$fname"
-          if [ -s "$fname" ]; then
-            grep -q "^#EXTM3U" "$fname" || sed -i '1i #EXTM3U' "$fname"
+          echo "🔗 下载完成: $fname"
+
+          # 判断是否是 M3U 格式
+          if grep -q "#EXTINF" "$fname"; then
             awk -v RS='#EXTINF' 'NR>1{print "#EXTINF" $0}' "$fname" | while read -r block; do
               name=$(echo "$block" | grep -oP '(?<=,).*' | head -1 | tr -d '\r')
               link=$(echo "$block" | tail -n1 | tr -d '\r')
@@ -50,23 +51,28 @@ jobs:
               fi
             done
           else
-            echo "❌ 跳过无内容：$url" >> ../iptv.log
+            # 如果没有EXTINF，也尝试提取 .m3u8 / .mpd 播放链接
+            grep -Eo 'https?://[^"]+\.(m3u8|mpd)' "$fname" | while read -r link; do
+              name=$(basename "$link")
+              echo "#EXTINF:-1,$name" > tempblock.txt
+              echo "$link" >> tempblock.txt
+              block=$(cat tempblock.txt)
+              echo "$name|||$link|||$block" >> all_blocks.txt
+            done
           fi
         done
 
     - name: Validate IPTV (multi-threaded)
       run: |
         cd temp
+        awk -F '|||' '!a[$1]++' all_blocks.txt > unique_blocks.txt
 
-        # 去重频道名（只保留第一个）
-        awk -F '|||' '!seen[$1]++' all_blocks.txt > unique_blocks.txt
-
-        cut -d '|||' -f2 unique_blocks.txt | xargs -I {} -P 10 bash -c '
+        cat unique_blocks.txt | cut -d '|||' -f2 | \
+        xargs -I {} -P 10 bash -c '
           url="$1"
-          entry=$(grep "$url" unique_blocks.txt | head -1)
-          name=$(echo "$entry" | cut -d "|||" -f1)
-          block=$(echo "$entry" | cut -d "|||" -f3-)
-          if curl -s --head --max-time 6 -A "Mozilla/5.0" -e "https://www.google.com" "$url" | grep -q "200 OK"; then
+          name=$(grep "$url" unique_blocks.txt | head -1 | cut -d "|||" -f1)
+          block=$(grep "$url" unique_blocks.txt | head -1 | cut -d "|||" -f3-)
+          if curl -s --head --max-time 5 -A "Mozilla/5.0" -e "https://www.google.com" "$url" | grep -q "200 OK"; then
             echo "$block" >> ../ALL_IPTV.m3u
             echo "✅ $name OK" >> ../iptv.log
           else
