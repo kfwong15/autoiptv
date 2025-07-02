@@ -3,7 +3,7 @@ name: Update
 on:
   push:
   schedule:
-    - cron: 0,30 * * * *  # 每小时两次自动运行
+    - cron: 0,01 * * * *  # 每小时两次自动运行
 
 env:
   TZ: Asia/Shanghai
