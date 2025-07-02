@@ -1,4 +1,4 @@
-name: Merge and Validate IPTV
+name: Auto Merge & Validate IPTV
 
 on:
   schedule:
@@ -9,80 +9,74 @@ env:
   TZ: Asia/Shanghai
 
 jobs:
-  validate_merge:
+  merge:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repo
+    - name: Checkout repository
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
+        persist-credentials: false
 
-    - name: Prepare files
+    - name: Set time
+      run: echo "NOW=$(date +'%Y-%m-%d %H:%M:%S CST')" >> $GITHUB_ENV
+
+    - name: Validate & merge IPTV
       run: |
         echo "#EXTM3U" > ALL_IPTV.m3u
         > invalid.txt
         > iptv.log
         > all_blocks.txt
 
-        for file in *.m3u; do
-          [ "$file" = "ALL_IPTV.m3u" ] && continue
-          echo "🔍 正在处理文件：$file"
-          awk -v RS='#EXTINF' 'NR>1{print "#EXTINF" $0}' "$file" > parsed.tmp
+        FILES=(
+          "kiki4177_iptv_main_JSS.m3u"
+          "kiki4177_iptv_main_JSTORE-PRIMETV.m3u"
+          "kiki4177_iptv_main_Kiki.m3u"
+          "kfwong15_ABC_refs_heads_main_owntv.m3u"
+        )
 
-          while read -r block; do
-            name=$(echo "$block" | grep -oP '(?<=,).*' | head -1 | tr -d '\r' | sed 's#[/ ]#_#g')
-            url=$(echo "$block" | tail -n1 | tr -d '\r')
-            if [[ "$url" =~ \.m3u8$ || "$url" =~ \.mpd$ ]]; then
-              echo "$name|||$url|||$block" >> all_blocks.txt
-            fi
-          done < parsed.tmp
-
-          rm -f parsed.tmp
+        for file in "${FILES[@]}"; do
+          if [ -f "$file" ] && [ -s "$file" ]; then
+            awk -v RS='#EXTINF' 'NR>1{print "#EXTINF" $0}' "$file" | while read -r block; do
+              name=$(echo "$block" | grep -oP '(?<=,).*' | head -1 | tr -d '\r')
+              url=$(echo "$block" | tail -n1 | tr -d '\r')
+              if [[ "$url" =~ \.m3u8$ || "$url" =~ \.mpd$ ]]; then
+                echo "$name|||$url|||$block" >> all_blocks.txt
+              fi
+            done
+          fi
         done
 
-    - name: Validate and select best
-      run: |
-        mkdir -p checked
-        sort all_blocks.txt | uniq > deduped_blocks.txt
+        # 去重频道名
+        awk -F '|||' '!seen[$1]++' all_blocks.txt > unique_blocks.txt
 
-        awk -F '|||' '{print $1}' deduped_blocks.txt | sort | uniq > names.txt
-
-        while read -r name; do
-          grep "^$name|||" deduped_blocks.txt > "checked/$name.txt"
-          best_line=""
-          best_time=999999
-
-          while IFS='|||' read -r cname curl cblock; do
-            start=$(date +%s%3N)
-            if curl -s --head --max-time 5 -A "Mozilla/5.0" "$curl" | grep -q "200 OK"; then
-              end=$(date +%s%3N)
-              rtt=$((end - start))
-              if (( rtt < best_time )); then
-                best_time=$rtt
-                best_line="$cblock"
-              fi
-            else
-              echo "$cname <$curl>" >> invalid.txt
-              echo "❌ $cname FAIL ($curl)" >> iptv.log
-            fi
-          done < "checked/$name.txt"
-
-          if [ -n "$best_line" ]; then
-            echo "$best_line" >> ALL_IPTV.m3u
-            echo "✅ $name OK (RTT ${best_time}ms)" >> iptv.log
+        # 多线程验证链接
+        cat unique_blocks.txt | cut -d '|||' -f2 | \
+        xargs -I {} -P 10 bash -c '
+          url="$1"
+          line=$(grep "$url" unique_blocks.txt | head -1)
+          name=$(echo "$line" | cut -d "|||" -f1)
+          block=$(echo "$line" | cut -d "|||" -f3-)
+          if curl -s --head --max-time 5 -A "Mozilla/5.0" "$url" | grep -q "200 OK"; then
+            echo "$block" >> ALL_IPTV.m3u
+            echo "✅ $name OK" >> iptv.log
+          else
+            echo "$name <$url>" >> invalid.txt
+            echo "❌ $name FAIL" >> iptv.log
           fi
-        done < names.txt
+        ' _ {}
 
-    - name: Update time
-      run: echo "📅 最后更新时间: $(date +'%Y-%m-%d %H:%M:%S')" > README.md
+    - name: Update README
+      run: |
+        echo "📅 最后更新时间: $NOW" > README.md
 
-    - name: Commit & push
+    - name: Commit & push changes
       run: |
         git config --global user.name "kfwong15"
         git config --global user.email "kfwong15@users.noreply.github.com"
         git pull origin main || true
-        git add ALL_IPTV.m3u invalid.txt iptv.log README.md || echo "⚠️ 无变化"
-        git commit -m "✅ Auto update IPTV $(date +'%Y-%m-%d %H:%M:%S')" || echo "✅ 无需提交"
+        git add ALL_IPTV.m3u invalid.txt README.md iptv.log || echo "⚠️ Nothing to add"
+        git commit -m "✅ IPTV Merge at $NOW" || echo "✅ No changes"
         git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-        git push || echo "✅ 无需推送"
+        git push || echo "✅ No push needed"
