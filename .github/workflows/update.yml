@@ -28,6 +28,7 @@ jobs:
           "https://raw.githubusercontent.com/kiki4177/iptv/main/JSS"
           "https://raw.githubusercontent.com/kiki4177/iptv/main/JSTORE-PRIMETV"
           "https://raw.githubusercontent.com/kiki4177/iptv/main/Kiki"
+          "https://raw.githubusercontent.com/kfwong15/ABC/refs/heads/main/owntv"
         )
 
         echo "#EXTM3U" > ALL_IPTV.m3u
