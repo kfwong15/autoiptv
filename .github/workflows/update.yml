@@ -17,7 +17,6 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-        persist-credentials: false
 
     - name: Prepare files
       run: |
@@ -26,31 +25,33 @@ jobs:
         > iptv.log
         > all_blocks.txt
 
-        FILES=$(ls *.m3u | grep -v ALL_IPTV || true)
+        for file in *.m3u; do
+          [ "$file" = "ALL_IPTV.m3u" ] && continue
+          echo "🔍 正在处理文件：$file"
+          awk -v RS='#EXTINF' 'NR>1{print "#EXTINF" $0}' "$file" > parsed.tmp
 
-        for file in $FILES; do
-          echo "🔍 处理文件：$file"
-          awk -v RS='#EXTINF' 'NR>1{print "#EXTINF" $0}' "$file" | while read -r block; do
-            name=$(echo "$block" | grep -oP '(?<=,).*' | head -1 | tr -d '\r')
+          while read -r block; do
+            name=$(echo "$block" | grep -oP '(?<=,).*' | head -1 | tr -d '\r' | sed 's#[/ ]#_#g')
             url=$(echo "$block" | tail -n1 | tr -d '\r')
             if [[ "$url" =~ \.m3u8$ || "$url" =~ \.mpd$ ]]; then
               echo "$name|||$url|||$block" >> all_blocks.txt
             fi
-          done
+          done < parsed.tmp
+
+          rm -f parsed.tmp
         done
 
-    - name: Sort by speed and deduplicate
+    - name: Validate and select best
       run: |
         mkdir -p checked
         sort all_blocks.txt | uniq > deduped_blocks.txt
 
-        # 检查重复频道，保留最快
         awk -F '|||' '{print $1}' deduped_blocks.txt | sort | uniq > names.txt
 
         while read -r name; do
           grep "^$name|||" deduped_blocks.txt > "checked/$name.txt"
           best_line=""
-          best_time=9999
+          best_time=999999
 
           while IFS='|||' read -r cname curl cblock; do
             start=$(date +%s%3N)
@@ -69,7 +70,7 @@ jobs:
 
           if [ -n "$best_line" ]; then
             echo "$best_line" >> ALL_IPTV.m3u
-            echo "✅ $name OK (best RTT ${best_time}ms)" >> iptv.log
+            echo "✅ $name OK (RTT ${best_time}ms)" >> iptv.log
           fi
         done < names.txt
 
