@@ -2,12 +2,12 @@ name: AutoFetchIPTV
 
 on:
   schedule:
-    - cron: '*/6 * * * *'  # 每 6 分钟运行一次
+    - cron: '*/6 * * * *'
   workflow_dispatch:
 
 env:
   TZ: Asia/Shanghai
-  IPTV_URL: "https://raw.githubusercontent.com/kiki4177/iptv/refs/heads/main/JSS"
+  IPTV_URL: "https://raw.githubusercontent.com/kiki4177/iptv/main/JSS"
 
 jobs:
   fetch:
@@ -23,28 +23,29 @@ jobs:
     - name: Get Time
       run: echo "GET_TIME=$(date +'%Y-%m-%d %H:%M:%S CST')" >> $GITHUB_ENV
 
-    - name: Download and Create File from URL
+    - name: Download and Save File
       run: |
-        echo "📥 下载链接：$IPTV_URL"
+        echo "📥 正在下载：$IPTV_URL"
 
-        # 提取文件名，确保不会为空
+        # 自动提取文件名
         FILE_NAME=$(echo "$IPTV_URL" | sed 's|https://raw.githubusercontent.com/||' | sed 's|/|_|g')
 
-        # 验证文件名
-        if [ -z "$FILE_NAME" ]; then
-          echo "❌ 无法生成文件名，终止"
+        echo "📄 文件名为：$FILE_NAME"
+
+        # 下载
+        wget "$IPTV_URL" -O "$FILE_NAME"
+
+        if [ -s "$FILE_NAME" ]; then
+          echo "✅ 下载成功：$FILE_NAME"
+
+          # 添加 #EXTM3U 标头（如果缺失）
+          grep -q "^#EXTM3U" "$FILE_NAME" || sed -i '1i #EXTM3U' "$FILE_NAME"
+        else
+          echo "❌ 下载失败或文件为空：$FILE_NAME"
           exit 1
         fi
 
-        echo "📄 保存文件为：$FILE_NAME"
-
-        # 下载
-        wget "$IPTV_URL" -O "$FILE_NAME" || echo "" > "$FILE_NAME"
-
-        # 添加头部
-        grep -q "^#EXTM3U" "$FILE_NAME" || sed -i '1i #EXTM3U' "$FILE_NAME"
-
-        # 写入更新说明
+        echo "📝 更新时间写入 README.md"
         echo "Auto update at ${GET_TIME}" > README.md
 
     - name: Commit and Push
@@ -52,12 +53,7 @@ jobs:
         git config --global user.name "kfwong15"
         git config --global user.email "kfwong15@users.noreply.github.com"
 
-        # 安全 add：确保文件存在
-        if [ -f "$FILE_NAME" ]; then
-          git add "$FILE_NAME" README.md
-          git commit -m "Updated $FILE_NAME at ${GET_TIME}" || echo "✅ 无需提交"
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-          git push || echo "✅ 无需推送"
-        else
-          echo "⚠️ 文件不存在，跳过提交"
-        fi
+        git add "$FILE_NAME" README.md
+        git commit -m "Auto update at ${GET_TIME}" || echo "✅ 无需提交"
+        git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+        git push || echo "✅ 无需推送"
