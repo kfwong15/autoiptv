@@ -2,59 +2,62 @@ name: AutoFetchIPTV
 
 on:
   schedule:
-    - cron: '*/6 * * * *'  # 每 6 分钟运行一次
-  workflow_dispatch:        # 手动运行支持
+    - cron: '*/6 * * * *'  # 每 6 分钟执行一次
+  workflow_dispatch:
 
 env:
   TZ: Asia/Shanghai
-  IPTV_URL: "https://raw.githubusercontent.com/kiki4177/iptv/main/JSS"
 
 jobs:
   fetch:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repo
+    - name: Checkout repository
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
         persist-credentials: false
 
-    - name: Set time
+    - name: Get current time
       run: echo "GET_TIME=$(date +'%Y-%m-%d %H:%M:%S CST')" >> $GITHUB_ENV
 
-    - name: Download and save IPTV file
+    - name: Download and Save All IPTV Files
       run: |
-        echo "✅ 开始处理链接: $IPTV_URL"
+        LINKS=(
+          "https://raw.githubusercontent.com/kiki4177/iptv/main/JSS"
+          "https://raw.githubusercontent.com/kiki4177/iptv/main/JSTORE-PRIMETV"
+          "https://raw.githubusercontent.com/kiki4177/iptv/main/Kiki"
+        )
 
-        # 自动生成文件名（加上 .m3u）
-        FILE_NAME=$(echo "$IPTV_URL" | sed 's|https://raw.githubusercontent.com/||' | sed 's|/|_|g').m3u
+        for URL in "${LINKS[@]}"; do
+          echo "🌐 下载链接：$URL"
 
-        echo "📄 文件名将为：$FILE_NAME"
+          # 自动构造文件名
+          FILE_NAME=$(echo "$URL" | sed 's|https://raw.githubusercontent.com/||' | sed 's|/|_|g').m3u
+          echo "📄 保存为：$FILE_NAME"
 
-        # 下载链接内容
-        wget -q "$IPTV_URL" -O "$FILE_NAME"
+          # 下载文件
+          wget -q "$URL" -O "$FILE_NAME"
 
-        # 检查文件是否存在且不为空
-        if [ ! -s "$FILE_NAME" ]; then
-          echo "❌ 下载失败或内容为空：$FILE_NAME"
-          exit 1
-        fi
+          # 检查是否下载成功且非空
+          if [ -s "$FILE_NAME" ]; then
+            echo "✅ 下载成功：$FILE_NAME"
+            grep -q "^#EXTM3U" "$FILE_NAME" || sed -i '1i #EXTM3U' "$FILE_NAME"
+          else
+            echo "❌ 下载失败或为空：$FILE_NAME"
+            rm -f "$FILE_NAME"
+          fi
+        done
 
-        # 添加 #EXTM3U 头（如没有）
-        grep -q "^#EXTM3U" "$FILE_NAME" || sed -i '1i #EXTM3U' "$FILE_NAME"
-
-        echo "📦 成功保存为 $FILE_NAME"
-
-        # 创建 README
-        echo "Last updated at ${GET_TIME}" > README.md
+        echo "更新时间：${GET_TIME}" > README.md
 
     - name: Commit and push to GitHub
       run: |
         git config --global user.name "kfwong15"
         git config --global user.email "kfwong15@users.noreply.github.com"
 
-        git add . || echo "⚠️ git add 没有变化"
+        git add *.m3u README.md || echo "⚠️ 没有文件变动"
         git commit -m "Auto update at ${GET_TIME}" || echo "✅ 无需提交"
         git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
         git push || echo "✅ 无需推送"
