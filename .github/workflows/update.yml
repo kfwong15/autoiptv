@@ -67,3 +67,14 @@ jobs:
         git commit -am "${GET_TIME}"
         git push -f origin latest_branch:Files
         
+            - name: Push to Files branch
+      env:
+        TOKEN: ${{ secrets.PAT }}
+      run: |
+        git remote set-url origin https://kfwong15:${TOKEN}@github.com/kfwong15/autoiptv.git
+        git push -f origin latest_branch:Files
+        
+        
+        
+        
+        
