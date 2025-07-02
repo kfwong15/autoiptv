@@ -24,13 +24,11 @@ jobs:
 
     - name: Check working directory and list files
       run: |
-        echo "Current directory: $GITHUB_WORKSPACE"
-        ls -la "$GITHUB_WORKSPACE"
+        echo "Current directory: $(pwd)"
+        ls -la
 
     - name: Validate & merge IPTV
       run: |
-        cd "$GITHUB_WORKSPACE"
-
         echo "#EXTM3U" > ALL_IPTV.m3u
         > invalid.txt
         > iptv.log
@@ -72,7 +70,6 @@ jobs:
 
     - name: Update README.md
       run: |
-        cd "$GITHUB_WORKSPACE"
         echo "📅 最后更新时间: $NOW" > README.md
         echo "" >> README.md
         echo "📺 [点击下载最新 IPTV 列表](./ALL_IPTV.m3u)" >> README.md
@@ -82,11 +79,8 @@ jobs:
 
     - name: Commit & push changes
       run: |
-        cd "$GITHUB_WORKSPACE"
         git config --global user.name "kfwong15"
         git config --global user.email "kfwong15@users.noreply.github.com"
         git pull origin main || true
         git add ALL_IPTV.m3u invalid.txt README.md iptv.log || echo "⚠️ Nothing to add"
-        git commit -m "✅ IPTV Merge at $NOW" || echo "✅ No changes"
-        git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-        git push || echo "✅ No push needed"
+        git
