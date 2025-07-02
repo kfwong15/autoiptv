@@ -3,7 +3,7 @@ name: Update
 on:
   push:
   schedule:
-    - cron: '*/1 * * * *'  # 每 1 分钟运行一次
+    - cron: '*/1 * * * *'  # 每 1 分钟运行一次（注意免费账号 GitHub 会限制最小5分钟）
 
 env:
   TZ: Asia/Shanghai
@@ -19,35 +19,43 @@ jobs:
     - name: GetTime
       run: echo "GET_TIME=$(date +'%Y-%m-%d %H:%M:%S CST')" >> $GITHUB_ENV
 
+    - name: Ensure Required Files Exist
+      run: |
+        touch CCTV.m3u
+        touch CNTV.m3u
+        touch IPTV.m3u
+        touch EPG.xml
+        touch README.md
+
     - name: Update IPTV Files
       run: |
+        # 下载源
+        wget https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/ipv6.m3u -O source.m3u
+
         # 央视源
-        rm -f CCTV.m3u && wget https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/ipv6.m3u -O CCTV.m3u
-        sed -i -n '/央视/,+1p' CCTV.m3u
+        grep -A1 "央视" source.m3u > CCTV.m3u || echo "#EXTM3U" > CCTV.m3u
         sed -i '1i #EXTM3U' CCTV.m3u
         sed -i '/^\s*$/d' CCTV.m3u
 
         # 卫视源
-        rm -f CNTV.m3u && touch CNTV.m3u
-        wget https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/ipv6.m3u -O CNTV1.m3u && sed -i -n '/卫视/,+1p' CNTV1.m3u
-        wget https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/ipv6.m3u -O CNTV2.m3u && sed -i -n '/数字/,+1p' CNTV2.m3u
-        wget https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/ipv6.m3u -O CNTV3.m3u && sed -i -n '/百视/,+1p' CNTV3.m3u
+        grep -A1 "卫视" source.m3u > CNTV1.m3u
+        grep -A1 "数字" source.m3u > CNTV2.m3u
+        grep -A1 "百视" source.m3u > CNTV3.m3u
         cat CNTV1.m3u CNTV2.m3u CNTV3.m3u > CNTV.m3u
-        rm -f CNTV1.m3u CNTV2.m3u CNTV3.m3u
         sed -i '1i #EXTM3U' CNTV.m3u
         sed -i '/^\s*$/d' CNTV.m3u
+        rm -f CNTV1.m3u CNTV2.m3u CNTV3.m3u
 
         # 整合源
-        rm -f IPTV.m3u && touch IPTV.m3u
-        cat CCTV.m3u CNTV.m3u >> IPTV.m3u
+        cat CCTV.m3u CNTV.m3u > IPTV.m3u
         sed -i '/#EXTM3U/d' IPTV.m3u
         sed -i '1i #EXTM3U' IPTV.m3u
         sed -i '/^\s*$/d' IPTV.m3u
 
-        # 节目源
-        rm -f EPG.xml && wget https://epg.112114.xyz/pp.xml -O EPG.xml
+        # EPG
+        wget https://epg.112114.xyz/pp.xml -O EPG.xml
 
-        # 更新说明
+        # 更新时间说明
         echo "Auto Update IPTV in ${GET_TIME}" > README.md
 
     - name: Push to Files Branch
