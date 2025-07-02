@@ -22,10 +22,10 @@ jobs:
     - name: Get current time
       run: echo "GET_TIME=$(date +'%Y-%m-%d %H:%M:%S CST')" >> $GITHUB_ENV
 
-    - name: Download and Merge M3U Files (No Deduplication)
+    - name: Download and Merge M3U Files (Keep spaces and blank lines)
       run: |
         LINKS=(
-          "https://raw.githubusercontent.com/Broadcasthub/1ptv/refs/heads/main/bhiptv"
+          "https://raw.githubusercontent.com/kfwong15/ABC/refs/heads/main/owntv"
         )
 
         echo "#EXTM3U" > ALL_IPTV.m3u
@@ -37,8 +37,8 @@ jobs:
 
           if [ -s "$FILE_NAME" ]; then
             grep -q "^#EXTM3U" "$FILE_NAME" || sed -i '1i #EXTM3U' "$FILE_NAME"
-            sed -i '/^\s*$/d' "$FILE_NAME"
-
+            
+            # ⚠️ 不再删除空行，保留所有原始格式
             tail -n +2 "$FILE_NAME" >> ALL_IPTV.m3u
           else
             echo "❌ 文件为空或下载失败：$FILE_NAME"
