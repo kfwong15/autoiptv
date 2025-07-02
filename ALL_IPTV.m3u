@@ -164,40 +164,40 @@ Sila isi URL dalam ott ikut step. bukan click link ini
 #EXTM3U url-tvg="https://epg.51zmt.top:8001/e.xml"
 
 #EXTINF:-1 tvg-id="CCTV1" group-title="中国电视大全",CCTV1
-http://183.221.193.148:4022/rtp/239.11.0.65:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.65:5140
 #EXTINF:-1 tvg-id="CCTV2" group-title="中国电视大全",CCTV2
-http://183.221.193.148:4022/rtp/239.11.0.108:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.108:5140
 #EXTINF:-1 tvg-id="CCTV3" group-title="中国电视大全",CCTV3
-http://183.221.193.148:4022/rtp/239.11.0.101:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.101:5140
 
 
 #EXTM3U url-tvg="http://example.com/epg.xml"
 #EXTINF:-1 tvg-id="CCTV4" tvg-name="CCTV4" tvg-logo="" group-title="中国电视大全",CCTV4
-http://183.221.193.148:4022/rtp/239.11.0.109:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.109:5140
 #EXTINF:-1 tvg-id="CCTV5" tvg-name="CCTV5" tvg-logo="" group-title="中国电视大全",CCTV5
-http://183.221.193.148:4022/rtp/239.11.0.100:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.100:5140
 #EXTINF:-1 tvg-id="CCTV6" tvg-name="CCTV6" tvg-logo="" group-title="中国电视大全",CCTV6
-http://183.221.193.148:4022/rtp/239.11.0.102:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.102:5140
 #EXTINF:-1 tvg-id="CCTV7" tvg-name="CCTV7" tvg-logo="" group-title="中国电视大全",CCTV7
-http://183.221.193.148:4022/rtp/239.11.0.110:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.110:5140
 #EXTINF:-1 tvg-id="CCTV8" tvg-name="CCTV8" tvg-logo="" group-title="中国电视大全",CCTV8
-http://183.221.193.148:4022/rtp/239.11.0.103:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.103:5140
 #EXTINF:-1 tvg-id="CCTV9" tvg-name="CCTV9" tvg-logo="" group-title="中国电视大全",CCTV9
-http://183.221.193.148:4022/rtp/239.11.0.111:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.111:5140
 #EXTINF:-1 tvg-id="CCTV10" tvg-name="CCTV10" tvg-logo="" group-title="中国电视大全",CCTV10
-http://183.221.193.148:4022/rtp/239.11.0.112:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.112:5140
 #EXTINF:-1 tvg-id="CCTV11" tvg-name="CCTV11" tvg-logo="" group-title="中国电视大全",CCTV11
-http://183.221.193.148:4022/rtp/239.11.0.22:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.22:5140
 #EXTINF:-1 tvg-id="CCTV12" tvg-name="CCTV12" tvg-logo="" group-title="中国电视大全",CCTV12
-http://183.221.193.148:4022/rtp/239.11.0.113:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.113:5140
 #EXTINF:-1 tvg-id="CCTV13" tvg-name="CCTV13" tvg-logo="" group-title="中国电视大全",CCTV13
-http://183.221.193.148:4022/rtp/239.11.0.24:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.24:5140
 #EXTINF:-1 tvg-id="CCTV14" tvg-name="CCTV14" tvg-logo="" group-title="中国电视大全",CCTV14
-http://183.221.193.148:4022/rtp/239.11.0.114:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.114:5140
 #EXTINF:-1 tvg-id="CCTV15" tvg-name="CCTV15" tvg-logo="" group-title="中国电视大全",CCTV15
-http://183.221.193.148:4022/rtp/239.11.0.26:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.26:5140
 #EXTINF:-1 tvg-id="CCTV17" tvg-name="CCTV17" tvg-logo="" group-title="中国电视大全",CCTV17
-http://183.221.193.148:4022/rtp/239.11.0.107:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.107:5140
 
 
 
@@ -208,93 +208,93 @@ http://183.221.193.148:4022/rtp/239.11.0.107:5140
 
 
 #EXTINF:-1 group-title="中国电视大全",CGTN
-http://183.221.193.148:4022/rtp/239.11.0.138:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.138:5140
 #EXTINF:-1 group-title="中国电视大全",湖南卫视
-http://183.221.193.148:4022/rtp/239.11.0.119:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.119:5140
 #EXTINF:-1 group-title="中国电视大全",浙江卫视
-http://183.221.193.148:4022/rtp/239.11.0.70:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.70:5140
 #EXTINF:-1 group-title="中国电视大全",江苏卫视
-http://183.221.193.148:4022/rtp/239.11.0.76:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.76:5140
 #EXTINF:-1 group-title="中国电视大全",北京卫视
-http://183.221.193.148:4022/rtp/239.11.0.121:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.121:5140
 #EXTINF:-1 group-title="中国电视大全",江西卫视
-http://183.221.193.148:4022/rtp/239.11.0.42:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.42:5140
 #EXTINF:-1 group-title="中国电视大全",广东卫视
-http://183.221.193.148:4022/rtp/239.11.0.115:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.115:5140
 #EXTINF:-1 group-title="中国电视大全",深圳卫视
-http://183.221.193.148:4022/rtp/239.11.0.71:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.71:5140
 #EXTINF:-1 group-title="中国电视大全",东方卫视
-http://183.221.193.148:4022/rtp/239.11.0.68:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.68:5140
 #EXTINF:-1 group-title="中国电视大全",海南卫视
-http://183.221.193.148:4022/rtp/239.11.0.193:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.193:5140
 #EXTINF:-1 group-title="中国电视大全",天津卫视
-http://183.221.193.148:4022/rtp/239.11.0.123:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.123:5140
 #EXTINF:-1 group-title="中国电视大全",重庆卫视
-http://183.221.193.148:4022/rtp/239.11.0.116:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.116:5140
 #EXTINF:-1 group-title="中国电视大全",辽宁卫视
-http://183.221.193.148:4022/rtp/239.11.0.118:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.118:5140
 #EXTINF:-1 group-title="中国电视大全",东南卫视
-http://183.221.193.148:4022/rtp/239.11.0.41:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.41:5140
 #EXTINF:-1 group-title="中国电视大全",广西卫视
-http://183.221.193.148:4022/rtp/239.11.0.48:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.48:5140
 #EXTINF:-1 group-title="中国电视大全",河北卫视
-http://183.221.193.148:4022/rtp/239.11.0.31:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.31:5140
 #EXTINF:-1 group-title="中国电视大全",山西卫视
-http://183.221.193.148:4022/rtp/239.11.0.32:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.32:5140
 #EXTINF:-1 group-title="中国电视大全",陕西卫视
-http://183.221.193.148:4022/rtp/239.11.0.54:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.54:5140
 #EXTINF:-1 group-title="中国电视大全",贵州卫视
-http://183.221.193.148:4022/rtp/239.11.0.51:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.51:5140
 #EXTINF:-1 group-title="中国电视大全",湖北卫视
-http://183.221.193.148:4022/rtp/239.11.0.74:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.74:5140
 #EXTINF:-1 group-title="中国电视大全",青海卫视
-http://183.221.193.148:4022/rtp/239.11.0.56:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.56:5140
 #EXTINF:-1 group-title="中国电视大全",河南卫视
-http://183.221.193.148:4022/rtp/239.11.0.44:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.44:5140
 #EXTINF:-1 group-title="中国电视大全",山东卫视
-http://183.221.193.148:4022/rtp/239.11.0.73:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.73:5140
 #EXTINF:-1 group-title="中国电视大全",安徽卫视
-http://183.221.193.148:4022/rtp/239.11.0.117:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.117:5140
 #EXTINF:-1 group-title="中国电视大全",宁夏卫视
-http://183.221.193.148:4022/rtp/239.11.0.57:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.57:5140
 #EXTINF:-1 group-title="中国电视大全",甘肃卫视
-http://183.221.193.148:4022/rtp/239.11.0.55:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.55:5140
 #EXTINF:-1 group-title="中国电视大全",西藏卫视
-http://183.221.193.148:4022/rtp/239.11.0.53:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.53:5140
 #EXTINF:-1 group-title="中国电视大全",内蒙古卫视
-http://183.221.193.148:4022/rtp/239.11.0.33:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.33:5140
 #EXTINF:-1 group-title="中国电视大全",吉林卫视
-http://183.221.193.148:4022/rtp/239.11.0.35:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.35:5140
 #EXTINF:-1 group-title="中国电视大全",新疆卫视
-http://183.221.193.148:4022/rtp/239.11.0.58:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.58:5140
 #EXTINF:-1 group-title="中国电视大全",兵团卫视
-http://183.221.193.148:4022/rtp/239.11.0.204:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.204:5140
 #EXTINF:-1 group-title="中国电视大全",云南卫视
-http://183.221.193.148:4022/rtp/239.11.0.52:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.52:5140
 #EXTINF:-1 group-title="中国电视大全",黑龙江卫视
-http://183.221.193.148:4022/rtp/239.11.0.36:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.36:5140
 #EXTINF:-1 group-title="中国电视大全",金鹰卡通
-http://183.221.193.148:4022/rtp/239.11.0.127:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.127:5140
 #EXTINF:-1 group-title="中国电视大全",卡酷少儿
-http://183.221.193.148:4022/rtp/239.11.0.129:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.129:5140
 #EXTINF:-1 group-title="中国电视大全",嘉佳卡通
-http://183.221.193.148:4022/rtp/239.11.0.203:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.203:5140
 #EXTINF:-1 group-title="中国电视大全",优漫卡通
-http://183.221.193.148:4022/rtp/239.11.0.63:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.63:5140
 #EXTINF:-1 group-title="中国电视大全",哈哈炫动
-http://183.221.193.148:4022/rtp/239.11.0.64:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.64:5140
 #EXTINF:-1 group-title="中国电视大全",真4K
-http://183.221.193.148:4022/rtp/239.11.0.122:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.122:5140
 #EXTINF:-1 group-title="中国电视大全",看电影
-http://183.221.193.148:4022/rtp/239.11.0.191:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.191:5140
 #EXTINF:-1 group-title="中国电视大全",CETV1
-http://183.221.193.148:4022/rtp/239.11.0.139:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.139:5140
 #EXTINF:-1 group-title="中国电视大全",CETV2
-http://183.221.193.148:4022/rtp/239.11.0.246:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.246:5140
 #EXTINF:-1 group-title="中国电视大全",CETV3
-http://183.221.193.148:4022/rtp/239.11.0.247:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.247:5140
 #EXTINF:-1 group-title="中国电视大全",CETV4
-http://183.221.193.148:4022/rtp/239.11.0.248:5140
+http://proxy.example.com/http://183.221.193.148:4022/rtp/239.11.0.248:5140
 
 
 
@@ -1256,7 +1256,7 @@ https://d35j504z0x2vu2.cloudfront.net/v1/manifest/0bc8e8376bd8417a1b6761138aa41c
 #KODIPROP:inputstreamaddon=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 #KODIPROP:inputstream.adaptive.mime_type=application/vnd.apple.mpegurl
-http://103.109.45.5:1935/madhatv/madhatv.stream_HDp/chunklist_w67072347.m3u8
+http://proxy.example.com/http://103.109.45.5:1935/madhatv/madhatv.stream_HDp/chunklist_w67072347.m3u8
 
 
 
