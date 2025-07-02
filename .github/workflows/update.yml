@@ -25,7 +25,7 @@ jobs:
     - name: Download and Merge M3U Files (No Deduplication)
       run: |
         LINKS=(
-          "https://raw.githubusercontent.com/kfwong15/ABC/refs/heads/main/owntv"
+          "https://raw.githubusercontent.com/Broadcasthub/1ptv/refs/heads/main/bhiptv"
         )
 
         echo "#EXTM3U" > ALL_IPTV.m3u
