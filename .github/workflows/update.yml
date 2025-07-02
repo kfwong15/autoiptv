@@ -2,8 +2,8 @@ name: Update
 
 on:
   schedule:
-    - cron: '*/6 * * * *'   # 每 6 分钟运行
-  workflow_dispatch:
+    - cron: '*/6 * * * *'  # 每 6 分钟运行一次
+  workflow_dispatch:        # 支持手动触发
 
 env:
   TZ: Asia/Shanghai
@@ -19,26 +19,35 @@ jobs:
         fetch-depth: 0
         persist-credentials: false
 
-    - name: Get time
+    - name: Get current time
       run: echo "GET_TIME=$(date +'%Y-%m-%d %H:%M:%S CST')" >> $GITHUB_ENV
 
     - name: Generate IPTV files
       run: |
+        echo "Downloading IPTV source..."
         wget https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/ipv6.m3u -O source.m3u
 
+        echo "Filtering CCTV..."
         grep -A1 "CCTV" source.m3u > CCTV.m3u || true
+
+        echo "Filtering卫视、数字、百视..."
         grep -A1 "卫视" source.m3u > CNTV1.m3u || true
         grep -A1 "数字" source.m3u > CNTV2.m3u || true
         grep -A1 "百视" source.m3u > CNTV3.m3u || true
-
         cat CNTV1.m3u CNTV2.m3u CNTV3.m3u > CNTV.m3u || true
+
+        echo "Adding headers..."
         echo "#EXTM3U" | cat - CCTV.m3u > tmp && mv tmp CCTV.m3u
         echo "#EXTM3U" | cat - CNTV.m3u > tmp && mv tmp CNTV.m3u
 
+        echo "Combining IPTV.m3u..."
         cat CCTV.m3u CNTV.m3u > IPTV.m3u
         echo "#EXTM3U" | cat - IPTV.m3u > tmp && mv tmp IPTV.m3u
 
+        echo "Downloading EPG..."
         wget https://epg.112114.xyz/pp.xml -O EPG.xml || true
+
+        echo "Writing README..."
         echo "Auto update at ${GET_TIME}" > README.md
 
     - name: Commit and push
@@ -46,7 +55,7 @@ jobs:
         git config --global user.name "kfwong15"
         git config --global user.email "kfwong15@users.noreply.github.com"
 
-        git add CCTV.m3u CNTV.m3u IPTV.m3u EPG.xml README.md
-        git commit -m "${GET_TIME}" || echo "No changes to commit"
+        git add CCTV.m3u CNTV.m3u IPTV.m3u EPG.xml README.md || true
+        git commit -m "Auto update at ${GET_TIME}" || echo "Nothing to commit"
         git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-        git push
+        git push || echo "Nothing to push"
