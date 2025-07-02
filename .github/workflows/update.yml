@@ -3,7 +3,7 @@ name: Update
 on:
   push:
   schedule:
-    - cron: 0,01 * * * *
+    - cron: 0,30 * * * *
 
 env:
   TZ: Asia/Shanghai
@@ -58,7 +58,7 @@ jobs:
         rm -f EPG.xml && wget https://epg.112114.xyz/pp.xml -O EPG.xml
         echo "Auto Update IPTV in ${GET_TIME}" > README.md
 
-        - name: Clean and Push Files branch
+    - name: Clean and Push Files branch
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
@@ -66,3 +66,4 @@ jobs:
         git add -A
         git commit -am "${GET_TIME}"
         git push -f origin latest_branch:Files
+        
