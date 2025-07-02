@@ -22,52 +22,49 @@ jobs:
     - name: GetTime
       run: echo "GET_TIME=$(date +'%Y-%m-%d %H:%M:%S CST')" >> $GITHUB_ENV
 
-    - name: Ensure Required Files Exist
+    - name: Generate IPTV Files and Save to _temp
       run: |
-        touch CCTV.m3u CNTV.m3u IPTV.m3u EPG.xml README.md
+        mkdir -p _temp
+        wget https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/ipv6.m3u -O _temp/source.m3u || true
 
-    - name: Update IPTV Files
-      run: |
-        wget https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/ipv6.m3u -O source.m3u || true
+        grep -A1 "央视" _temp/source.m3u > _temp/CCTV.m3u || echo "" > _temp/CCTV.m3u
+        sed -i '1i #EXTM3U' _temp/CCTV.m3u
+        sed -i '/^\s*$/d' _temp/CCTV.m3u
 
-        grep -A1 "央视" source.m3u > CCTV.m3u || echo "" > CCTV.m3u
-        sed -i '1i #EXTM3U' CCTV.m3u
-        sed -i '/^\s*$/d' CCTV.m3u
+        grep -A1 "卫视" _temp/source.m3u > _temp/CNTV1.m3u || true
+        grep -A1 "数字" _temp/source.m3u > _temp/CNTV2.m3u || true
+        grep -A1 "百视" _temp/source.m3u > _temp/CNTV3.m3u || true
+        cat _temp/CNTV1.m3u _temp/CNTV2.m3u _temp/CNTV3.m3u > _temp/CNTV.m3u
+        sed -i '1i #EXTM3U' _temp/CNTV.m3u
+        sed -i '/^\s*$/d' _temp/CNTV.m3u
+        rm -f _temp/CNTV1.m3u _temp/CNTV2.m3u _temp/CNTV3.m3u
 
-        grep -A1 "卫视" source.m3u > CNTV1.m3u || true
-        grep -A1 "数字" source.m3u > CNTV2.m3u || true
-        grep -A1 "百视" source.m3u > CNTV3.m3u || true
-        cat CNTV1.m3u CNTV2.m3u CNTV3.m3u > CNTV.m3u
-        sed -i '1i #EXTM3U' CNTV.m3u
-        sed -i '/^\s*$/d' CNTV.m3u
-        rm -f CNTV1.m3u CNTV2.m3u CNTV3.m3u
+        cat _temp/CCTV.m3u _temp/CNTV.m3u > _temp/IPTV.m3u
+        sed -i '/#EXTM3U/d' _temp/IPTV.m3u
+        sed -i '1i #EXTM3U' _temp/IPTV.m3u
+        sed -i '/^\s*$/d' _temp/IPTV.m3u
 
-        cat CCTV.m3u CNTV.m3u > IPTV.m3u
-        sed -i '/#EXTM3U/d' IPTV.m3u
-        sed -i '1i #EXTM3U' IPTV.m3u
-        sed -i '/^\s*$/d' IPTV.m3u
+        wget https://epg.112114.xyz/pp.xml -O _temp/EPG.xml || true
 
-        wget https://epg.112114.xyz/pp.xml -O EPG.xml || true
+        echo "Auto Update IPTV in ${GET_TIME}" > _temp/README.md
 
-        echo "Auto Update IPTV in ${GET_TIME}" > README.md
-
-    - name: Push to Files Branch (clean orphan)
+    - name: Push to Files Branch (via temp)
       run: |
         git config --global user.name "kfwong15"
         git config --global user.email "kfwong15@users.noreply.github.com"
 
-        # 新建 clean 的 orphan 分支
+        # 新建分支
         git checkout --orphan Files
-
-        # 移除所有暂存/缓存文件（必要！否则冲突）
         git reset --hard
         git clean -fdx
 
-        # 复制生成的文件
-        echo "准备推送更新..."
+        # 恢复生成的文件
+        cp _temp/* ./
+
+        echo "最终文件列表："
         ls -al
 
-        git add CCTV.m3u CNTV.m3u IPTV.m3u EPG.xml README.md || true
-        git commit -m "${GET_TIME}" || echo "No changes"
+        git add .
+        git commit -m "${GET_TIME}" || echo "No changes to commit"
         git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/kfwong15/autoiptv.git
         git push -f origin Files
