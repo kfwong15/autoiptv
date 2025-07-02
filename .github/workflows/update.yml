@@ -37,18 +37,20 @@ jobs:
         )
 
         for url in "${LINKS[@]}"; do
-          fname=$(basename "$url").m3u
+          fname=$(echo "$url" | sed 's|https://||; s|/|_|g').m3u
+          echo "📥 下载：$url → $fname"
           curl -sL "$url" -o "$fname"
           if [ -s "$fname" ]; then
             grep -q "^#EXTM3U" "$fname" || sed -i '1i #EXTM3U' "$fname"
             awk -v RS='#EXTINF' 'NR>1{print "#EXTINF" $0}' "$fname" | while read -r block; do
               name=$(echo "$block" | grep -oP '(?<=,).*' | head -1 | tr -d '\r')
               link=$(echo "$block" | tail -n1 | tr -d '\r')
-              # 仅保留 .m3u8 / .mpd 类型
               if [[ "$link" =~ \.m3u8$ || "$link" =~ \.mpd$ ]]; then
                 echo "$name|||$link|||$block" >> all_blocks.txt
               fi
             done
+          else
+            echo "❌ 跳过无内容：$url" >> ../iptv.log
           fi
         done
 
@@ -57,14 +59,14 @@ jobs:
         cd temp
 
         # 去重频道名（只保留第一个）
-        awk -F '|||' '!a[$1]++' all_blocks.txt > unique_blocks.txt
+        awk -F '|||' '!seen[$1]++' all_blocks.txt > unique_blocks.txt
 
-        cat unique_blocks.txt | cut -d '|||' -f2 | \
-        xargs -I {} -P 10 bash -c '
+        cut -d '|||' -f2 unique_blocks.txt | xargs -I {} -P 10 bash -c '
           url="$1"
-          name=$(grep "$url" unique_blocks.txt | head -1 | cut -d "|||" -f1)
-          block=$(grep "$url" unique_blocks.txt | head -1 | cut -d "|||" -f3-)
-          if curl -s --head --max-time 5 -A "Mozilla/5.0" -e "https://www.google.com" "$url" | grep -q "200 OK"; then
+          entry=$(grep "$url" unique_blocks.txt | head -1)
+          name=$(echo "$entry" | cut -d "|||" -f1)
+          block=$(echo "$entry" | cut -d "|||" -f3-)
+          if curl -s --head --max-time 6 -A "Mozilla/5.0" -e "https://www.google.com" "$url" | grep -q "200 OK"; then
             echo "$block" >> ../ALL_IPTV.m3u
             echo "✅ $name OK" >> ../iptv.log
           else
