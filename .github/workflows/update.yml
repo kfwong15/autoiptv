@@ -22,7 +22,7 @@ jobs:
     - name: Get current time
       run: echo "GET_TIME=$(date +'%Y-%m-%d %H:%M:%S CST')" >> $GITHUB_ENV
 
-    - name: Download, Clean, Validate and Merge M3U Files
+    - name: Download, Clean, and Merge M3U Files (Skip Validation)
       run: |
         LINKS=(
           "https://raw.githubusercontent.com/kiki4177/iptv/main/JSS"
@@ -54,12 +54,8 @@ jobs:
                 NAME=$(echo "$LINE1" | sed -n 's/^.*,//p' | tr -d '\r\n')
 
                 if ! grep -q ",$NAME$" "$TEMP_ALL"; then
-                  if curl -s --fail --max-time 5 "$LINE2" > /dev/null; then
-                    echo "$LINE1" >> "$TEMP_ALL"
-                    echo "$LINE2" >> "$TEMP_ALL"
-                  else
-                    echo "❌ 无效链接：$NAME ($LINE2)，已跳过"
-                  fi
+                  echo "$LINE1" >> "$TEMP_ALL"
+                  echo "$LINE2" >> "$TEMP_ALL"
                 else
                   echo "⚠️ 重复频道：$NAME，已跳过"
                 fi
@@ -70,19 +66,3 @@ jobs:
           else
             echo "❌ 文件为空或下载失败：$FILE_NAME"
           fi
-        done
-
-        cat "$TEMP_ALL" >> ALL_IPTV.m3u
-        rm -f "$TEMP_ALL"
-
-        echo "Auto update at ${GET_TIME}" > README.md
-
-    - name: Commit and push
-      run: |
-        git config --global user.name "kfwong15"
-        git config --global user.email "kfwong15@users.noreply.github.com"
-
-        git add *.m3u README.md || echo "⚠️ 没有变化"
-        git commit -m "Auto update at ${GET_TIME}" || echo "✅ 无需提交"
-        git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-        git push || echo "✅ 无需推送"
