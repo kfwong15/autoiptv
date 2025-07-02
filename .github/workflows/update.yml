@@ -1,4 +1,4 @@
-name: AutoFetchAndMergeIPTV
+name: AutoIPTV
 
 on:
   schedule:
@@ -22,8 +22,8 @@ jobs:
     - name: Get current time
       run: echo "GET_TIME=$(date +'%Y-%m-%d %H:%M:%S CST')" >> $GITHUB_ENV
 
-    - name: Install curl
-      run: sudo apt-get install -y curl
+    - name: Install curl & timeout
+      run: sudo apt-get install -y curl coreutils
 
     - name: Download, Filter & Merge M3U Files
       run: |
@@ -34,10 +34,6 @@ jobs:
           "https://raw.githubusercontent.com/kfwong15/ABC/refs/heads/main/owntv"
         )
 
-        # 删除旧文件
-        rm -f ALL_IPTV.m3u temp_merge.txt
-
-        # 新建空文件
         echo "#EXTM3U" > ALL_IPTV.m3u
         TEMP_ALL="temp_merge.txt"
         > "$TEMP_ALL"
