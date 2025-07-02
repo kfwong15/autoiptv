@@ -1,69 +1,82 @@
-name: AutoFetchIPTV
+name: Auto Merge & Validate IPTV
 
 on:
   schedule:
-    - cron: '*/6 * * * *'  # 每 6 分钟运行一次
-  workflow_dispatch:        # 手动运行支持
+    - cron: '*/6 * * * *'
+  workflow_dispatch:
 
 env:
   TZ: Asia/Shanghai
 
 jobs:
-  fetch:
+  merge:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repo
+    - name: Checkout repository
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
         persist-credentials: false
 
     - name: Set time
-      run: echo "GET_TIME=$(date +'%Y-%m-%d %H:%M:%S CST')" >> $GITHUB_ENV
+      run: echo "NOW=$(date +'%Y-%m-%d %H:%M:%S CST')" >> $GITHUB_ENV
 
-    - name: Download and save IPTV files
+    - name: Validate & merge IPTV
       run: |
-        echo "📦 开始采集所有链接..."
+        echo "#EXTM3U" > ALL_IPTV.m3u
+        > invalid.txt
+        > iptv.log
+        > all_blocks.txt
 
-        LINKS=(
-          "https://raw.githubusercontent.com/kiki4177/iptv/main/JSS"
-          "https://raw.githubusercontent.com/kiki4177/iptv/main/JSTORE-PRIMETV"
-          "https://raw.githubusercontent.com/kiki4177/iptv/main/Kiki"
-          "https://raw.githubusercontent.com/kfwong15/ABC/refs/heads/main/owntv"
+        FILES=(
+          "kiki4177_iptv_main_JSS.m3u"
+          "kiki4177_iptv_main_JSTORE-PRIMETV.m3u"
+          "kiki4177_iptv_main_Kiki.m3u"
+          "kfwong15_ABC_refs_heads_main_owntv.m3u"
         )
 
-        for IPTV_URL in "${LINKS[@]}"; do
-          echo "✅ 处理链接: $IPTV_URL"
-
-          # 自动生成文件名（如 kiki4177_iptv_main_JSS.m3u）
-          FILE_NAME=$(echo "$IPTV_URL" | sed 's|https://raw.githubusercontent.com/||' | sed 's|/|_|g').m3u
-          echo "📄 文件名为: $FILE_NAME"
-
-          # 下载文件
-          wget -q "$IPTV_URL" -O "$FILE_NAME"
-
-          # 检查是否成功
-          if [ ! -s "$FILE_NAME" ]; then
-            echo "❌ 失败或文件为空: $FILE_NAME"
-            continue
+        for file in "${FILES[@]}"; do
+          if [ -f "$file" ] && [ -s "$file" ]; then
+            awk -v RS='#EXTINF' 'NR>1{print "#EXTINF" $0}' "$file" | while read -r block; do
+              name=$(echo "$block" | grep -oP '(?<=,).*' | head -1 | tr -d '\r')
+              url=$(echo "$block" | tail -n1 | tr -d '\r')
+              if [[ "$url" =~ \.m3u8$ || "$url" =~ \.mpd$ ]]; then
+                echo "$name|||$url|||$block" >> all_blocks.txt
+              fi
+            done
           fi
-
-          # 添加 #EXTM3U 开头（如没有）
-          grep -q "^#EXTM3U" "$FILE_NAME" || sed -i '1i #EXTM3U' "$FILE_NAME"
-
-          echo "✅ 成功保存 $FILE_NAME"
         done
 
-        # 更新 README.md 显示最后更新时间
-        echo "📅 Last updated at ${GET_TIME}" > README.md
+        # 去重频道名
+        awk -F '|||' '!seen[$1]++' all_blocks.txt > unique_blocks.txt
 
-    - name: Commit and push to GitHub
+        # 多线程验证链接
+        cat unique_blocks.txt | cut -d '|||' -f2 | \
+        xargs -I {} -P 10 bash -c '
+          url="$1"
+          line=$(grep "$url" unique_blocks.txt | head -1)
+          name=$(echo "$line" | cut -d "|||" -f1)
+          block=$(echo "$line" | cut -d "|||" -f3-)
+          if curl -s --head --max-time 5 -A "Mozilla/5.0" "$url" | grep -q "200 OK"; then
+            echo "$block" >> ALL_IPTV.m3u
+            echo "✅ $name OK" >> iptv.log
+          else
+            echo "$name <$url>" >> invalid.txt
+            echo "❌ $name FAIL" >> iptv.log
+          fi
+        ' _ {}
+
+    - name: Update README
+      run: |
+        echo "📅 最后更新时间: $NOW" > README.md
+
+    - name: Commit & push changes
       run: |
         git config --global user.name "kfwong15"
         git config --global user.email "kfwong15@users.noreply.github.com"
-
-        git add . || echo "⚠️ 无需添加"
-        git commit -m "🎯 Auto fetch at ${GET_TIME}" || echo "✅ 无需提交"
+        git pull origin main || true
+        git add ALL_IPTV.m3u invalid.txt README.md iptv.log || echo "⚠️ Nothing to add"
+        git commit -m "✅ IPTV Merge at $NOW" || echo "✅ No changes"
         git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-        git push || echo "✅ 无需推送"
+        git push || echo "✅ No push needed"
