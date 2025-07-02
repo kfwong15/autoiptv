@@ -2,8 +2,8 @@ name: Auto Merge & Validate IPTV
 
 on:
   schedule:
-    - cron: '*/6 * * * *'  # 每 6 分钟执行一次
-  workflow_dispatch:        # 手动触发支持
+    - cron: '*/6 * * * *'  # 每6分钟运行
+  workflow_dispatch:        # 支持手动触发
 
 env:
   TZ: Asia/Shanghai
@@ -19,7 +19,7 @@ jobs:
         fetch-depth: 0
         persist-credentials: false
 
-    - name: Set time
+    - name: Set current time
       run: echo "NOW=$(date +'%Y-%m-%d %H:%M:%S CST')" >> $GITHUB_ENV
 
     - name: Validate & merge IPTV
@@ -29,7 +29,7 @@ jobs:
         > iptv.log
         > all_blocks.txt
 
-        # 自动读取所有 .m3u 文件（排除 ALL_IPTV.m3u 本身）
+        # 获取所有 .m3u 文件（排除输出文件）
         FILES=( $(ls *.m3u | grep -v '^ALL_IPTV\.m3u$') )
 
         for file in "${FILES[@]}"; do
@@ -63,7 +63,7 @@ jobs:
           fi
         ' _ {}
 
-    - name: Update README
+    - name: Update README.md
       run: |
         echo "📅 最后更新时间: $NOW" > README.md
         echo "" >> README.md
