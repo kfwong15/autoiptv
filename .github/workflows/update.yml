@@ -28,6 +28,7 @@ jobs:
           "https://raw.githubusercontent.com/kiki4177/iptv/main/JSS"
           "https://raw.githubusercontent.com/kiki4177/iptv/main/JSTORE-PRIMETV"
           "https://raw.githubusercontent.com/kiki4177/iptv/main/Kiki"
+          "https://raw.githubusercontent.com/kfwong15/ABC/refs/heads/main/owntv"
         )
 
         echo "#EXTM3U" > ALL_IPTV.m3u
@@ -36,6 +37,7 @@ jobs:
 
         for URL in "${LINKS[@]}"; do
           FILE_NAME=$(echo "$URL" | sed 's|https://raw.githubusercontent.com/||' | sed 's|/|_|g').m3u
+          echo "🔗 正在下载：$URL → $FILE_NAME"
           wget -q "$URL" -O "$FILE_NAME"
 
           if [ -s "$FILE_NAME" ]; then
@@ -46,7 +48,6 @@ jobs:
               NAME=$(echo "$block" | grep -oP '(?<=,).*' | head -1)
               STREAM_URL=$(echo "$block" | tail -n1)
 
-              # 检查链接是否有效
               if curl -s --head --max-time 5 "$STREAM_URL" | grep -q "200 OK"; then
                 if ! grep -q ",$NAME$" "$TEMP"; then
                   echo "$block" >> "$TEMP"
@@ -59,7 +60,7 @@ jobs:
               fi
             done
           else
-            echo "⚠️ 下载失败或空内容：$FILE_NAME"
+            echo "⚠️ 下载失败或内容为空：$FILE_NAME"
           fi
         done
 
