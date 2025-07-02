@@ -3,7 +3,7 @@ name: Update
 on:
   push:
   schedule:
-    - cron: '*/1 * * * *'  # 每 1 分钟运行一次（注意：GitHub 免费账户最小实际执行间隔为 5 分钟）
+    - cron: '*/6 * * * *'  # 每 1 分钟运行一次（注意：GitHub 免费账户最小实际执行间隔为 5 分钟）
 
 env:
   TZ: Asia/Shanghai
