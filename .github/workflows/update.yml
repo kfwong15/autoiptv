@@ -2,8 +2,8 @@ name: AutoFetchAndMergeIPTV
 
 on:
   schedule:
-    - cron: '*/6 * * * *'
-  workflow_dispatch:
+    - cron: '*/6 * * * *'  # 每6分钟运行一次
+  workflow_dispatch:        # 支持手动运行
 
 env:
   TZ: Asia/Shanghai
@@ -22,7 +22,7 @@ jobs:
     - name: Get current time
       run: echo "GET_TIME=$(date +'%Y-%m-%d %H:%M:%S CST')" >> $GITHUB_ENV
 
-    - name: Download, Clean and Merge
+    - name: Download, Clean and Merge M3U Files
       run: |
         LINKS=(
           "https://raw.githubusercontent.com/kiki4177/iptv/main/JSS"
@@ -31,47 +31,34 @@ jobs:
         )
 
         echo "#EXTM3U" > ALL_IPTV.m3u
-        TEMP_FILE="temp_iptv.txt"
-        > "$TEMP_FILE"
+        TEMP_ALL="temp_merge.txt"
+        > "$TEMP_ALL"
 
         for URL in "${LINKS[@]}"; do
-          echo "🌐 正在下载：$URL"
-
           FILE_NAME=$(echo "$URL" | sed 's|https://raw.githubusercontent.com/||' | sed 's|/|_|g').m3u
+          echo "📥 下载：$URL → $FILE_NAME"
           wget -q "$URL" -O "$FILE_NAME"
 
           if [ -s "$FILE_NAME" ]; then
-            echo "✅ 下载成功：$FILE_NAME"
             grep -q "^#EXTM3U" "$FILE_NAME" || sed -i '1i #EXTM3U' "$FILE_NAME"
             sed -i '/^\s*$/d' "$FILE_NAME"
 
-            # 解析每个频道条目
+            # 将频道逐个去重合并
             awk -v RS='#EXTINF' 'NR>1{print "#EXTINF" $0}' "$FILE_NAME" | while read -r block; do
               NAME=$(echo "$block" | grep -oP '(?<=,).*' | head -1)
-              URL=$(echo "$block" | tail -n1)
-
-              # 检查 URL 是否可访问（忽略 SSL 错误）
-              if curl -s --head --max-time 5 --insecure "$URL" | grep -q "200 OK"; then
-                # 去重判断：频道名不能重复
-                if ! grep -q ",$NAME$" "$TEMP_FILE"; then
-                  echo "$block" >> "$TEMP_FILE"
-                else
-                  echo "⚠️ 跳过重复频道：$NAME"
-                fi
+              if ! grep -q ",$NAME$" "$TEMP_ALL"; then
+                echo "$block" >> "$TEMP_ALL"
               else
-                echo "❌ 无法访问：$NAME <$URL>"
+                echo "⚠️ 重复频道：$NAME，已跳过"
               fi
             done
-
           else
-            echo "❌ 下载失败或文件为空：$FILE_NAME"
-            rm -f "$FILE_NAME"
+            echo "❌ 文件为空或下载失败：$FILE_NAME"
           fi
         done
 
-        # 合并有效频道
-        cat "$TEMP_FILE" >> ALL_IPTV.m3u
-        rm -f "$TEMP_FILE"
+        cat "$TEMP_ALL" >> ALL_IPTV.m3u
+        rm -f "$TEMP_ALL"
 
         echo "Auto update at ${GET_TIME}" > README.md
 
