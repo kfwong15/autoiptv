@@ -16,8 +16,8 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
       with:
-        persist-credentials: false  # 允许后程自定义凭证
-        fetch-depth: 0             # 拉取所有提交历史与分支
+        persist-credentials: false
+        fetch-depth: 0
 
     - name: GetTime
       run: echo "GET_TIME=$(date +'%Y-%m-%d %H:%M:%S CST')" >> $GITHUB_ENV
@@ -31,38 +31,44 @@ jobs:
         set +e
 
         wget https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/ipv6.m3u -O source.m3u
-        # 央视源
+
         grep -A1 "央视" source.m3u > CCTV.m3u
         [ -s CCTV.m3u ] || echo "#EXTM3U" > CCTV.m3u
-        sed -i '1i #EXTM3U' CCTV.m3u; sed -i '/^\s*$/d' CCTV.m3u
+        sed -i '1i #EXTM3U' CCTV.m3u
+        sed -i '/^\s*$/d' CCTV.m3u
 
-        # 卫视源
         grep -A1 "卫视" source.m3u > CNTV1.m3u
         grep -A1 "数字" source.m3u > CNTV2.m3u
         grep -A1 "百视" source.m3u > CNTV3.m3u
         cat CNTV1.m3u CNTV2.m3u CNTV3.m3u > CNTV.m3u
         [ -s CNTV.m3u ] || echo "#EXTM3U" > CNTV.m3u
-        sed -i '1i #EXTM3U' CNTV.m3u; sed -i '/^\s*$/d' CNTV.m3u
+        sed -i '1i #EXTM3U' CNTV.m3u
+        sed -i '/^\s*$/d' CNTV.m3u
         rm -f CNTV1.m3u CNTV2.m3u CNTV3.m3u
 
-        # 整合播放列表
         cat CCTV.m3u CNTV.m3u > IPTV.m3u
-        sed -i '/#EXTM3U/d' IPTV.m3u; sed -i '1i #EXTM3U' IPTV.m3u
+        sed -i '/#EXTM3U/d' IPTV.m3u
+        sed -i '1i #EXTM3U' IPTV.m3u
         sed -i '/^\s*$/d' IPTV.m3u
 
-        # EPG
         wget https://epg.112114.xyz/pp.xml -O EPG.xml
 
-        # 更新说明
         echo "Auto Update IPTV in ${GET_TIME}" > README.md
+
         set -e
 
-    - name: Push to Files Branch
+    - name: Push to Files Branch (orphan)
       run: |
         git config --global user.name "kfwong15"
         git config --global user.email "kfwong15@users.noreply.github.com"
+
+        # 新建空白分支，不保留历史，避免 checkout 报错
+        git checkout --orphan Files
+        git rm -rf . > /dev/null 2>&1 || true
+
+        # 添加生成的文件
+        git add CCTV.m3u CNTV.m3u IPTV.m3u EPG.xml README.md
+        git commit -m "${GET_TIME}"
+
         git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/kfwong15/autoiptv.git
-        git checkout Files || git checkout -b Files origin/Files
-        git add .
-        git commit -m "${GET_TIME}" || echo "No changes to commit"
-        git push -u origin Files --force
+        git push -f origin Files
