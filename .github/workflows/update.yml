@@ -2,7 +2,7 @@ name: Auto Merge & Validate IPTV
 
 on:
   schedule:
-    - cron: '*/6 * * * *'  # 每6分钟运行
+    - cron: '*/6 * * * *'  # 每 6 分钟运行一次
   workflow_dispatch:        # 支持手动触发
 
 env:
@@ -22,14 +22,21 @@ jobs:
     - name: Set current time
       run: echo "NOW=$(date +'%Y-%m-%d %H:%M:%S CST')" >> $GITHUB_ENV
 
+    - name: Check working directory and list files
+      run: |
+        echo "Current directory: $GITHUB_WORKSPACE"
+        ls -la "$GITHUB_WORKSPACE"
+
     - name: Validate & merge IPTV
       run: |
+        cd "$GITHUB_WORKSPACE"
+
         echo "#EXTM3U" > ALL_IPTV.m3u
         > invalid.txt
         > iptv.log
         > all_blocks.txt
 
-        # 获取所有 .m3u 文件（排除输出文件）
+        # 获取所有 .m3u 文件（排除输出文件本身）
         FILES=( $(ls *.m3u | grep -v '^ALL_IPTV\.m3u$') )
 
         for file in "${FILES[@]}"; do
@@ -65,6 +72,7 @@ jobs:
 
     - name: Update README.md
       run: |
+        cd "$GITHUB_WORKSPACE"
         echo "📅 最后更新时间: $NOW" > README.md
         echo "" >> README.md
         echo "📺 [点击下载最新 IPTV 列表](./ALL_IPTV.m3u)" >> README.md
@@ -74,6 +82,7 @@ jobs:
 
     - name: Commit & push changes
       run: |
+        cd "$GITHUB_WORKSPACE"
         git config --global user.name "kfwong15"
         git config --global user.email "kfwong15@users.noreply.github.com"
         git pull origin main || true
