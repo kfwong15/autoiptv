@@ -3,7 +3,7 @@ name: AutoFetchAndMergeIPTV
 on:
   schedule:
     - cron: '*/6 * * * *'  # 每6分钟运行一次
-  workflow_dispatch:
+  workflow_dispatch:        # 支持手动运行
 
 env:
   TZ: Asia/Shanghai
@@ -22,10 +22,12 @@ jobs:
     - name: Get current time
       run: echo "GET_TIME=$(date +'%Y-%m-%d %H:%M:%S CST')" >> $GITHUB_ENV
 
-    - name: Download, Clean, and Merge M3U Files (Skip Validation)
+    - name: Download, Clean and Merge M3U Files
       run: |
         LINKS=(
-
+          "https://raw.githubusercontent.com/kiki4177/iptv/main/JSS"
+          "https://raw.githubusercontent.com/kiki4177/iptv/main/JSTORE-PRIMETV"
+          "https://raw.githubusercontent.com/kiki4177/iptv/main/Kiki"
           "https://raw.githubusercontent.com/kfwong15/ABC/refs/heads/main/owntv"
         )
 
@@ -42,24 +44,15 @@ jobs:
             grep -q "^#EXTM3U" "$FILE_NAME" || sed -i '1i #EXTM3U' "$FILE_NAME"
             sed -i '/^\s*$/d' "$FILE_NAME"
 
-            total_lines=$(wc -l < "$FILE_NAME")
-            i=1
-            while [ $i -le $total_lines ]; do
-              LINE1=$(sed -n "${i}p" "$FILE_NAME")
-              LINE2=$(sed -n "$((i+1))p" "$FILE_NAME")
-
-              if [[ "$LINE1" == \#EXTINF* ]] && [[ "$LINE2" == http* ]]; then
-                NAME=$(echo "$LINE1" | sed -n 's/^.*,//p' | tr -d '\r\n')
-                if ! grep -q ",$NAME$" "$TEMP_ALL"; then
-                  echo "$LINE1" >> "$TEMP_ALL"
-                  echo "$LINE2" >> "$TEMP_ALL"
-                else
-                  echo "⚠️ 重复频道：$NAME，已跳过"
-                fi
+            # 将频道逐个去重合并
+            awk -v RS='#EXTINF' 'NR>1{print "#EXTINF" $0}' "$FILE_NAME" | while read -r block; do
+              NAME=$(echo "$block" | grep -oP '(?<=,).*' | head -1)
+              if ! grep -q ",$NAME$" "$TEMP_ALL"; then
+                echo "$block" >> "$TEMP_ALL"
+              else
+                echo "⚠️ 重复频道：$NAME，已跳过"
               fi
-
-              i=$((i+1))
-            done  # ← ← ← 这里是关键，原来少了它
+            done
           else
             echo "❌ 文件为空或下载失败：$FILE_NAME"
           fi
