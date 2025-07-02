@@ -1,74 +1,75 @@
 name: AutoFetchAndMergeIPTV
 
 on:
-  schedule:
-    - cron: '*/6 * * * *'  # 每6分钟运行一次
-  workflow_dispatch:
+schedule:
+- cron: '*/6 * * * *'  # 每6分钟运行一次
+workflow_dispatch:        # 支持手动运行
 
 env:
-  TZ: Asia/Shanghai
+TZ: Asia/Shanghai
 
 jobs:
-  fetch_merge:
-    runs-on: ubuntu-latest
+fetch_merge:
+runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          persist-credentials: false
+steps:  
+- name: Checkout repo  
+  uses: actions/checkout@v4  
+  with:  
+    fetch-depth: 0  
+    persist-credentials: false  
 
-      - name: Get current time
-        run: echo "GET_TIME=$(date +'%Y-%m-%d %H:%M:%S CST')" >> $GITHUB_ENV
+- name: Get current time  
+  run: echo "GET_TIME=$(date +'%Y-%m-%d %H:%M:%S CST')" >> $GITHUB_ENV  
 
-      - name: Download, Clean and Merge M3U Files
-        run: |
-          LINKS=(
-            "https://raw.githubusercontent.com/kfwong15/ABC/refs/heads/main/owntv"
-          )
+- name: Download, Clean and Merge M3U Files  
+  run: |  
+    LINKS=(  
+      
+      "https://raw.githubusercontent.com/kfwong15/ABC/refs/heads/main/owntv"  
+    )  
 
-          # 删除旧文件
-          rm -f ALL_IPTV.m3u temp_merge.txt
+    echo "#EXTM3U" > ALL_IPTV.m3u  
+    TEMP_ALL="temp_merge.txt"  
+    > "$TEMP_ALL"  
 
-          echo "#EXTM3U" > ALL_IPTV.m3u
-          TEMP_ALL="temp_merge.txt"
-          > "$TEMP_ALL"
+    for URL in "${LINKS[@]}"; do  
+      FILE_NAME=$(echo "$URL" | sed 's|https://raw.githubusercontent.com/||' | sed 's|/|_|g').m3u  
+      echo "📥 下载：$URL → $FILE_NAME"  
+      wget -q "$URL" -O "$FILE_NAME"  
 
-          for URL in "${LINKS[@]}"; do
-            FILE_NAME=$(echo "$URL" | sed 's|https://raw.githubusercontent.com/||' | sed 's|/|_|g').m3u
-            echo "📥 下载：$URL → $FILE_NAME"
-            wget -q "$URL" -O "$FILE_NAME"
+      if [ -s "$FILE_NAME" ]; then  
+        grep -q "^#EXTM3U" "$FILE_NAME" || sed -i '1i #EXTM3U' "$FILE_NAME"  
+        sed -i '/^\s*$/d' "$FILE_NAME"  
 
-            if [ -s "$FILE_NAME" ]; then
-              grep -q "^#EXTM3U" "$FILE_NAME" || sed -i '1i #EXTM3U' "$FILE_NAME"
-              sed -i '/^\s*$/d' "$FILE_NAME"
+        # 将频道逐个去重合并  
+        awk -v RS='#EXTINF' 'NR>1{print "#EXTINF" $0}' "$FILE_NAME" | while read -r block; do  
+          NAME=$(echo "$block" | grep -oP '(?<=,).*' | head -1)  
+          if ! grep -q ",$NAME$" "$TEMP_ALL"; then  
+            echo "$block" >> "$TEMP_ALL"  
+          else  
+            echo "⚠️ 重复频道：$NAME，已跳过"  
+          fi  
+        done  
+      else  
+        echo "❌ 文件为空或下载失败：$FILE_NAME"  
+      fi  
+    done  
 
-              # 去重合并频道
-              awk -v RS='#EXTINF' 'NR>1{print "#EXTINF" $0}' "$FILE_NAME" | while read -r block; do
-                NAME=$(echo "$block" | grep -oP '(?<=,).*' | head -1)
-                if ! grep -q ",$NAME$" "$TEMP_ALL"; then
-                  echo "$block" >> "$TEMP_ALL"
-                else
-                  echo "⚠️ 重复频道：$NAME，已跳过"
-                fi
-              done
-            else
-              echo "❌ 文件为空或下载失败：$FILE_NAME"
-            fi
-          done
+    cat "$TEMP_ALL" >> ALL_IPTV.m3u  
+    rm -f "$TEMP_ALL"  
 
-          cat "$TEMP_ALL" >> ALL_IPTV.m3u
-          rm -f "$TEMP_ALL"
+    echo "Auto update at ${GET_TIME}" > README.md  
 
-          echo "Auto update at ${GET_TIME}" > README.md
+- name: Commit and push  
+  run: |  
+    git config --global user.name "kfwong15"  
+    git config --global user.email "kfwong15@users.noreply.github.com"  
 
-      - name: Commit and push
-        run: |
-          git config --global user.name "kfwong15"
-          git config --global user.email "kfwong15@users.noreply.github.com"
+    git add *.m3u README.md || echo "⚠️ 没有变化"  
+    git commit -m "Auto update at ${GET_TIME}" || echo "✅ 无需提交"  
+    git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git  
+    git push || echo "✅ 无需推送"
 
-          git add ALL_IPTV.m3u README.md || echo "⚠️ 没有变化"
-          git commit -m "Auto update at ${GET_TIME}" || echo "✅ 无需提交"
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-          git push || echo "✅ 无需推送"
+
+
