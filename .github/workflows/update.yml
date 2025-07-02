@@ -1,9 +1,9 @@
-name: AutoIPTV
+name: AutoFetchAndMergeIPTV
 
 on:
   schedule:
-    - cron: '*/6 * * * *'
-  workflow_dispatch:
+    - cron: '*/6 * * * *'  # 每6分钟运行一次
+  workflow_dispatch:        # 支持手动运行
 
 env:
   TZ: Asia/Shanghai
@@ -22,10 +22,7 @@ jobs:
     - name: Get current time
       run: echo "GET_TIME=$(date +'%Y-%m-%d %H:%M:%S CST')" >> $GITHUB_ENV
 
-    - name: Install curl & timeout
-      run: sudo apt-get install -y curl coreutils
-
-    - name: Download, Filter & Merge M3U Files
+    - name: Download, Clean and Merge M3U Files
       run: |
         LINKS=(
           "https://raw.githubusercontent.com/kiki4177/iptv/main/JSS"
@@ -47,17 +44,11 @@ jobs:
             grep -q "^#EXTM3U" "$FILE_NAME" || sed -i '1i #EXTM3U' "$FILE_NAME"
             sed -i '/^\s*$/d' "$FILE_NAME"
 
+            # 将频道逐个去重合并
             awk -v RS='#EXTINF' 'NR>1{print "#EXTINF" $0}' "$FILE_NAME" | while read -r block; do
               NAME=$(echo "$block" | grep -oP '(?<=,).*' | head -1)
-              URL_LINE=$(echo "$block" | tail -n 1)
-
               if ! grep -q ",$NAME$" "$TEMP_ALL"; then
-                STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "$URL_LINE")
-                if [[ "$STATUS" == "200" ]]; then
-                  echo "$block" >> "$TEMP_ALL"
-                else
-                  echo "❌ 频道失效：$NAME ($URL_LINE)"
-                fi
+                echo "$block" >> "$TEMP_ALL"
               else
                 echo "⚠️ 重复频道：$NAME，已跳过"
               fi
@@ -72,12 +63,12 @@ jobs:
 
         echo "Auto update at ${GET_TIME}" > README.md
 
-    - name: Commit and Push
+    - name: Commit and push
       run: |
         git config --global user.name "kfwong15"
         git config --global user.email "kfwong15@users.noreply.github.com"
 
-        git add ALL_IPTV.m3u README.md || echo "⚠️ 没有变化"
+        git add *.m3u README.md || echo "⚠️ 没有变化"
         git commit -m "Auto update at ${GET_TIME}" || echo "✅ 无需提交"
         git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
         git push || echo "✅ 无需推送"
