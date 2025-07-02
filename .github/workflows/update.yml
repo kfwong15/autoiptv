@@ -2,66 +2,51 @@ name: Update
 
 on:
   schedule:
-    - cron: '*/6 * * * *'  # 每6分钟运行一次
+    - cron: '*/6 * * * *'   # 每 6 分钟运行
   workflow_dispatch:
 
 env:
   TZ: Asia/Shanghai
 
 jobs:
-  Update:
+  update:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Files Branch (or create)
+    - name: Checkout current branch
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-        ref: Files  # 直接 checkout 到 Files 分支
         persist-credentials: false
 
-    - name: Get Time
+    - name: Get time
       run: echo "GET_TIME=$(date +'%Y-%m-%d %H:%M:%S CST')" >> $GITHUB_ENV
 
-    - name: Generate IPTV Files
+    - name: Generate IPTV files
       run: |
-        wget https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/ipv6.m3u -O source.m3u || true
+        wget https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/ipv6.m3u -O source.m3u
 
-        echo "=== 源文件内容预览 ==="
-        head -n 20 source.m3u || true
-
-        # 央视源（匹配英文 CCTV）
         grep -A1 "CCTV" source.m3u > CCTV.m3u || true
-        # 卫视源（多个关键字）
         grep -A1 "卫视" source.m3u > CNTV1.m3u || true
         grep -A1 "数字" source.m3u > CNTV2.m3u || true
         grep -A1 "百视" source.m3u > CNTV3.m3u || true
 
-        cat CNTV1.m3u CNTV2.m3u CNTV3.m3u > CNTV.m3u
-        echo "#EXTM3U" | cat - CCTV.m3u > temp && mv temp CCTV.m3u
-        echo "#EXTM3U" | cat - CNTV.m3u > temp && mv temp CNTV.m3u
+        cat CNTV1.m3u CNTV2.m3u CNTV3.m3u > CNTV.m3u || true
+        echo "#EXTM3U" | cat - CCTV.m3u > tmp && mv tmp CCTV.m3u
+        echo "#EXTM3U" | cat - CNTV.m3u > tmp && mv tmp CNTV.m3u
 
         cat CCTV.m3u CNTV.m3u > IPTV.m3u
-        echo "#EXTM3U" | cat - IPTV.m3u > temp && mv temp IPTV.m3u
+        echo "#EXTM3U" | cat - IPTV.m3u > tmp && mv tmp IPTV.m3u
 
         wget https://epg.112114.xyz/pp.xml -O EPG.xml || true
-        echo "Auto Update IPTV in ${GET_TIME}" > README.md
+        echo "Auto update at ${GET_TIME}" > README.md
 
-    - name: Debug File Output
-      run: |
-        echo "====== 当前文件列表 ======"
-        ls -al
-        echo "====== IPTV 内容预览 ======"
-        head -n 10 IPTV.m3u || echo "IPTV.m3u 未生成"
-        echo "====== EPG 预览 ======"
-        head -n 10 EPG.xml || echo "EPG.xml 未生成"
-
-    - name: Commit & Push
+    - name: Commit and push
       run: |
         git config --global user.name "kfwong15"
         git config --global user.email "kfwong15@users.noreply.github.com"
 
-        git add CCTV.m3u CNTV.m3u IPTV.m3u EPG.xml README.md || echo "Nothing to add"
+        git add CCTV.m3u CNTV.m3u IPTV.m3u EPG.xml README.md
         git commit -m "${GET_TIME}" || echo "No changes to commit"
-        git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/kfwong15/autoiptv.git
-        git push origin Files
+        git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+        git push
