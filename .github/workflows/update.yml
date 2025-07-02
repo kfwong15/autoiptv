@@ -28,20 +28,16 @@ jobs:
 
     - name: Update IPTV Files
       run: |
-        set +e
+        wget https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/ipv6.m3u -O source.m3u || true
 
-        wget https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/ipv6.m3u -O source.m3u
-
-        grep -A1 "央视" source.m3u > CCTV.m3u
-        [ -s CCTV.m3u ] || echo "#EXTM3U" > CCTV.m3u
+        grep -A1 "央视" source.m3u > CCTV.m3u || echo "" > CCTV.m3u
         sed -i '1i #EXTM3U' CCTV.m3u
         sed -i '/^\s*$/d' CCTV.m3u
 
-        grep -A1 "卫视" source.m3u > CNTV1.m3u
-        grep -A1 "数字" source.m3u > CNTV2.m3u
-        grep -A1 "百视" source.m3u > CNTV3.m3u
+        grep -A1 "卫视" source.m3u > CNTV1.m3u || true
+        grep -A1 "数字" source.m3u > CNTV2.m3u || true
+        grep -A1 "百视" source.m3u > CNTV3.m3u || true
         cat CNTV1.m3u CNTV2.m3u CNTV3.m3u > CNTV.m3u
-        [ -s CNTV.m3u ] || echo "#EXTM3U" > CNTV.m3u
         sed -i '1i #EXTM3U' CNTV.m3u
         sed -i '/^\s*$/d' CNTV.m3u
         rm -f CNTV1.m3u CNTV2.m3u CNTV3.m3u
@@ -51,24 +47,27 @@ jobs:
         sed -i '1i #EXTM3U' IPTV.m3u
         sed -i '/^\s*$/d' IPTV.m3u
 
-        wget https://epg.112114.xyz/pp.xml -O EPG.xml
+        wget https://epg.112114.xyz/pp.xml -O EPG.xml || true
 
         echo "Auto Update IPTV in ${GET_TIME}" > README.md
 
-        set -e
-
-    - name: Push to Files Branch (orphan)
+    - name: Push to Files Branch (clean orphan)
       run: |
         git config --global user.name "kfwong15"
         git config --global user.email "kfwong15@users.noreply.github.com"
 
-        # 新建空白分支，不保留历史，避免 checkout 报错
+        # 新建 clean 的 orphan 分支
         git checkout --orphan Files
-        git rm -rf . > /dev/null 2>&1 || true
 
-        # 添加生成的文件
-        git add CCTV.m3u CNTV.m3u IPTV.m3u EPG.xml README.md
-        git commit -m "${GET_TIME}"
+        # 移除所有暂存/缓存文件（必要！否则冲突）
+        git reset --hard
+        git clean -fdx
 
+        # 复制生成的文件
+        echo "准备推送更新..."
+        ls -al
+
+        git add CCTV.m3u CNTV.m3u IPTV.m3u EPG.xml README.md || true
+        git commit -m "${GET_TIME}" || echo "No changes"
         git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/kfwong15/autoiptv.git
         git push -f origin Files
