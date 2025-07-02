@@ -2,8 +2,8 @@ name: Auto Merge & Validate IPTV
 
 on:
   schedule:
-    - cron: '*/6 * * * *'
-  workflow_dispatch:
+    - cron: '*/6 * * * *'  # 每 6 分钟执行一次
+  workflow_dispatch:        # 手动触发支持
 
 env:
   TZ: Asia/Shanghai
@@ -29,12 +29,8 @@ jobs:
         > iptv.log
         > all_blocks.txt
 
-        FILES=(
-          "kiki4177_iptv_main_JSS.m3u"
-          "kiki4177_iptv_main_JSTORE-PRIMETV.m3u"
-          "kiki4177_iptv_main_Kiki.m3u"
-          "kfwong15_ABC_refs_heads_main_owntv.m3u"
-        )
+        # 自动读取所有 .m3u 文件（排除 ALL_IPTV.m3u 本身）
+        FILES=( $(ls *.m3u | grep -v '^ALL_IPTV\.m3u$') )
 
         for file in "${FILES[@]}"; do
           if [ -f "$file" ] && [ -s "$file" ]; then
@@ -70,6 +66,11 @@ jobs:
     - name: Update README
       run: |
         echo "📅 最后更新时间: $NOW" > README.md
+        echo "" >> README.md
+        echo "📺 [点击下载最新 IPTV 列表](./ALL_IPTV.m3u)" >> README.md
+        echo "" >> README.md
+        echo "✅ 有效频道数量: $(grep -c '#EXTINF' ALL_IPTV.m3u)" >> README.md
+        echo "❌ 无效频道数量: $(wc -l < invalid.txt)" >> README.md
 
     - name: Commit & push changes
       run: |
